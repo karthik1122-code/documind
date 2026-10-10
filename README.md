@@ -137,8 +137,8 @@ server.mjs         streaming API (server-sent events) + static files
 - [ ] Model-generated answers and injection results: `npm run eval:llm`
 - [ ] Deploy
 
-## Deploy the browser demo (Vercel)
+## Deploy (Vercel)
 
-`vercel.json` builds a static, self-contained demo: the real retrieval pipeline runs in the visitor's browser over the bundled Express 5 docs, with a landing page in front. Import the repository in Vercel and keep the defaults; the build command is `node demo/build.mjs` and the output is `demo/out`. No environment variables are needed.
+The whole site is one codebase: `/` is the landing page, `/app` is the app, and `api/*.mjs` re-export the same request handler `server.mjs` uses, so the Vercel deployment runs the real retrieval pipeline and the real upload flow. `vercel.json` serves `public/`, bundles `corpus/` and `src/` into the functions, and sets the security headers. Import the repository in Vercel and keep the defaults; no environment variables are needed. Set `GEMINI_API_KEY` to turn on model-written answers.
 
-The full server (`npm start`, `render.yaml`) is what supports your own uploads, rate limiting and optional Gemini answers.
+On Vercel each function instance is separate and short-lived, so uploaded collections are rebuilt from the files the browser sends again, and the rate limiter is per instance (best effort). `render.yaml` and the `Dockerfile` run the same code as one long-lived server, which is the simpler option if you want one shared limiter.
