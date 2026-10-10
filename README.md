@@ -136,3 +136,9 @@ server.mjs         streaming API (server-sent events) + static files
 - [ ] Neural embeddings (needs a model key): `npm run eval:gemini`
 - [ ] Model-generated answers and injection results: `npm run eval:llm`
 - [ ] Deploy
+
+## Deploy the browser demo (Vercel)
+
+`vercel.json` builds a static, self-contained demo: the real retrieval pipeline runs in the visitor's browser over the bundled Express 5 docs, with a landing page in front. Import the repository in Vercel and keep the defaults; the build command is `node demo/build.mjs` and the output is `demo/out`. No environment variables are needed.
+
+The full server (`npm start`, `render.yaml`) is what supports your own uploads, rate limiting and optional Gemini answers.

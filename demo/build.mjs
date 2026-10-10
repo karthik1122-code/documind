@@ -1,5 +1,5 @@
 // One self-contained HTML file: the real retrieval pipeline (BM25 + LSA + RRF + reranker + extractive answerer) running in the browser over the bundled Express 5 docs.
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
 const R = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const mods = ['stem', 'bm25', 'chunk', 'corpus', 'lsa', 'hybrid', 'rerank', 'answer', 'pipeline'];
 const wrap = name => {
@@ -89,4 +89,7 @@ ${app}
 </script>
 `;
 writeFileSync(new URL('./dist.html', import.meta.url), out);
+// Standalone page for static hosting (Vercel): a full document around the same markup.
+mkdirSync(new URL('./out/', import.meta.url), { recursive: true });
+writeFileSync(new URL('./out/index.html', import.meta.url), `<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n${out}\n</html>\n`);
 console.log('built', out.length);

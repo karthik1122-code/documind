@@ -1,0 +1,12 @@
+{
+  "framework": null,
+  "installCommand": "",
+  "buildCommand": "node demo/build.mjs",
+  "outputDirectory": "demo/out",
+  "headers": [
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "no-referrer" }
+    ] }
+  ]
+}
