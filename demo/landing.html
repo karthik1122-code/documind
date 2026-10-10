@@ -79,6 +79,48 @@ html[data-view=land],html[data-view=land] body{height:auto}
  .lp-row{grid-template-columns:112px minmax(0,1fr) 48px}.lp-sec{padding-top:72px}.lp-hero{padding-top:44px}.lp-wrap{padding:0 18px}.sp-sheet{min-height:280px}
 }
 @media (prefers-reduced-motion:reduce){.sp-q .cur{animation:none}.lp-row .fl{transition:none}}
+
+#land ::selection,.app ::selection{background:var(--marker);color:#fff}
+.lp-mq{border-top:2px solid var(--rule);border-bottom:2px solid var(--rule);overflow:hidden;margin-top:84px;background:var(--bg)}
+.lp-mq-t{display:flex;width:max-content;animation:mq 60s linear infinite}.lp-mq:hover .lp-mq-t{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(-50%)}}
+.lp-mq-i{display:flex;align-items:baseline;gap:14px;padding:20px 36px;white-space:nowrap;border-right:1px solid var(--line);font:600 clamp(20px,2.4vw,30px)/1 'Bricolage Grotesque';font-variation-settings:'opsz' 48,'wdth' 90;letter-spacing:-.02em}
+.lp-mq-i.ok span{background:linear-gradient(transparent 34%,var(--fill) 34% 94%,transparent 94%);padding:0 .1em}
+.lp-mq-i.no span{text-decoration:line-through;text-decoration-color:var(--marker);text-decoration-thickness:.08em;color:var(--ink2)}
+.lp-mq-i small{font:500 11px 'DM Mono',monospace;letter-spacing:0;color:var(--mute)}
+.lp-story{height:420vh;position:relative;margin-top:104px}
+.lp-pin{position:sticky;top:57px;height:calc(100vh - 57px);display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:0;border-top:2px solid var(--rule);border-bottom:2px solid var(--rule);background:var(--bg)}
+.lp-pin-l{padding:40px 36px 40px 28px;display:flex;flex-direction:column;justify-content:space-between;border-right:2px solid var(--rule);max-width:520px;margin-left:auto;width:100%}
+.lp-pin-l h2{font:800 clamp(34px,4.4vw,60px)/.98 'Bricolage Grotesque';font-variation-settings:'opsz' 80,'wdth' 88;letter-spacing:-.03em;margin:0}
+.lp-steps{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.lp-steps li{padding:14px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:34px 1fr;gap:8px;color:var(--mute);transition:color .3s}
+.lp-steps li b{font:700 20px 'Bricolage Grotesque';letter-spacing:-.02em}.lp-steps li span{display:block;font-size:14.5px;line-height:1.45;max-height:0;overflow:hidden;opacity:0;transition:max-height .4s,opacity .3s}
+.lp-steps li i{font:500 12px 'DM Mono',monospace;font-style:normal;padding-top:6px}
+.lp-steps li.on{color:var(--ink)}.lp-steps li.on i{color:var(--marker)}.lp-steps li.on span{max-height:90px;opacity:1;color:var(--ink2);margin-top:4px}
+.lp-prog{height:3px;background:var(--line);margin-top:20px}.lp-prog i{display:block;height:100%;width:0;background:var(--marker)}
+.lp-pin-r{position:relative;background:var(--reader);overflow:hidden;min-width:0}
+.lp-pn{position:absolute;inset:0;padding:34px 34px;opacity:0;transform:translateY(16px);transition:opacity .45s,transform .45s;pointer-events:none;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.lp-pn.on{opacity:1;transform:none}
+.lp-pn h4{margin:0;font:500 12px 'DM Mono',monospace;color:var(--mute)}
+.pg-s{background:var(--sheet);border:1px solid var(--line);border-radius:3px;font:400 12.5px/1.7 'DM Mono',monospace;color:var(--ink2);overflow:hidden}
+.pg-s .blk{padding:10px 16px;border-top:2px dashed transparent;position:relative;transition:border-color .5s,background .5s;white-space:pre-wrap;word-break:break-word}
+.pg-s .blk:first-child{border-top-width:0}
+.lp-pn.on .pg-s .blk{border-top-color:var(--marker)}.lp-pn.on .pg-s .blk:first-child{border-top-color:transparent}
+.pg-s .blk em{position:absolute;right:10px;top:-9px;background:var(--marker);color:#fff;font:500 10px 'DM Mono',monospace;font-style:normal;padding:0 6px;border-radius:2px;opacity:0;transition:opacity .4s .3s}.lp-pn.on .blk em{opacity:1}
+.pc{display:grid;grid-template-columns:24px minmax(0,1fr) 38%;gap:12px;align-items:center;padding:12px 14px;background:var(--sheet);border:1px solid var(--line);border-radius:3px;opacity:0;transform:translateX(-14px);transition:opacity .4s,transform .4s}
+.lp-pn.on .pc{opacity:1;transform:none}.lp-pn.on .pc:nth-of-type(2){transition-delay:.08s}.lp-pn.on .pc:nth-of-type(3){transition-delay:.16s}.lp-pn.on .pc:nth-of-type(4){transition-delay:.24s}.lp-pn.on .pc:nth-of-type(5){transition-delay:.32s}.lp-pn.on .pc:nth-of-type(6){transition-delay:.4s}
+.pc .no{font:500 12px 'DM Mono',monospace;color:var(--mute)}.pc .t{font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pc .t small{display:block;font:400 11px 'DM Mono',monospace;color:var(--mute);margin-top:2px}
+.pc .bt{height:8px;background:var(--line);border-radius:2px;overflow:hidden}.pc .bt i{display:block;height:100%;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .8s .3s cubic-bezier(.6,.05,.2,1)}.lp-pn.on .pc .bt i{transform:scaleX(1)}
+.pc.top{border-color:var(--marker)}.pc.top .bt i{background:var(--marker)}
+.gg{background:var(--sheet);border:1px solid var(--line);border-radius:3px;padding:18px 20px}
+.gg .row{display:grid;grid-template-columns:minmax(0,1fr) 62px;gap:14px;align-items:center;margin:14px 0}
+.gg .q{font-size:15px;font-weight:500;line-height:1.3}.gg .q small{display:block;font:400 11px 'DM Mono',monospace;color:var(--mute);margin-top:2px}
+.gg .trk{position:relative;height:16px;background:var(--line);border-radius:2px;margin-top:8px}.gg .trk i{position:absolute;left:0;top:0;bottom:0;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform 1s .3s cubic-bezier(.6,.05,.2,1)}.lp-pn.on .gg .trk i{transform:scaleX(1)}
+.gg .trk u{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--marker);text-decoration:none}.gg .trk u::after{content:"threshold";position:absolute;top:-17px;left:-24px;font:500 10px 'DM Mono',monospace;color:var(--marker)}
+.gg .v{font:500 13px 'DM Mono',monospace;text-align:right}.gg .res{font:600 12px 'DM Mono',monospace}.gg .res.y{color:var(--ok)}.gg .res.n{color:var(--bad)}
+.lp-big{font:600 clamp(24px,2.6vw,34px)/1.16 'Bricolage Grotesque';font-variation-settings:'opsz' 60,'wdth' 90;letter-spacing:-.025em}
+@media (max-width:900px){.lp-pin{grid-template-columns:1fr;grid-template-rows:auto 1fr}.lp-pin-l{border-right:0;border-bottom:2px solid var(--rule);padding:18px;max-width:none}.lp-pin-l h2{font-size:28px}.lp-steps li span{display:none}.lp-steps li{padding:6px 0}.lp-steps li b{font-size:16px}.lp-steps{grid-template-columns:repeat(4,1fr)}.lp-steps li{grid-template-columns:1fr}.lp-steps li i{display:none}.lp-pn{padding:16px}.lp-story{height:360vh;margin-top:64px}.lp-pin{top:57px}.lp-mq{margin-top:56px}}
+@media (prefers-reduced-motion:reduce){.lp-mq-t{animation:none}.lp-pn,.pc,.pc .bt i,.gg .trk i{transition:none}}
 </style>
 <div id="land">
   <nav class="lp-nav" aria-label="Primary"><div class="lp-wrap">
@@ -100,6 +142,30 @@ html[data-view=land],html[data-view=land] body{height:auto}
       <div class="sp-r"><div class="sp-h"><span id="dh">guide / routing</span><span id="dl"></span></div><div class="sp-sheet" id="ds"></div></div>
     </div>
   </div></header>
+
+
+  <div class="lp-mq" aria-label="Example questions and what DocuMind did with them"><div class="lp-mq-t" id="mq"></div></div>
+
+  <section class="lp-story" id="story" aria-label="How one question gets answered"><div class="lp-pin">
+    <div class="lp-pin-l">
+      <div><h2>One question, four checks.</h2></div>
+      <div>
+        <ol class="lp-steps" id="steps">
+          <li class="on"><i>01</i><div><b>Split</b><span>Pages are cut at headings. Each passage keeps its page title and heading.</span></div></li>
+          <li><i>02</i><div><b>Retrieve</b><span>Keyword search and a semantic index vote. A reranker orders the best five.</span></div></li>
+          <li><i>03</i><div><b>Check</b><span>The best sentence must cover enough of the question, or there is no answer.</span></div></li>
+          <li><i>04</i><div><b>Mark</b><span>The sentence is copied, cited, and highlighted on the original page.</span></div></li>
+        </ol>
+        <div class="lp-prog"><i id="prog"></i></div>
+      </div>
+    </div>
+    <div class="lp-pin-r">
+      <div class="lp-pn on" id="pn0"><h4 id="pn0h"></h4><div class="pg-s" id="pn0b"></div></div>
+      <div class="lp-pn" id="pn1"><h4 id="pn1h"></h4><div id="pn1b" style="display:contents"></div></div>
+      <div class="lp-pn" id="pn2"><h4>Coverage of the question by the best sentence</h4><div class="gg" id="pn2b"></div></div>
+      <div class="lp-pn" id="pn3"><h4 id="pn3h"></h4><div class="lp-big" id="pn3a"></div><div class="pg-s" id="pn3b"></div></div>
+    </div>
+  </div></section>
 
   <section class="lp-sec" id="how"><div class="lp-wrap">
     <h2>Small enough to read. Measured before it was trusted.</h2>
@@ -209,9 +275,58 @@ html[data-view=land],html[data-view=land] body{height:auto}
     }
     dm.classList.add('on');
   }
+
+  /* marquee: every example question, run through the real pipeline */
+  const EX = ['How do I make part of a route path optional?', "How do I turn on all of Express's internal debug logs?", 'Which Node.js version can run .ts files directly?', 'What function must a template engine export so res.render can use it?', 'How do I store user sessions in Redis?', 'How do I protect against CSRF attacks?', 'What is the capital of Australia?'];
+  async function probe(q) { const res = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: q }) }); const t = await res.text(); const ev = t.split('\n\n').filter(l => l.startsWith('data:')).map(l => JSON.parse(l.slice(5))); return { sources: ev.find(e => e.type === 'sources').sources, answer: ev.find(e => e.type === 'answer') }; }
+  async function marquee() {
+    const rs = await Promise.all(EX.map(probe)); const t = $('mq');
+    const one = () => rs.map((r, i) => { const d = document.createElement('div'); d.className = 'lp-mq-i ' + (r.answer.abstained ? 'no' : 'ok'); const sp = document.createElement('span'); sp.textContent = EX[i]; const sm = document.createElement('small'); sm.textContent = r.answer.abstained ? 'not in the docs' : 'answered · ' + nice(r.answer.citations[0].file); d.append(sp, sm); return d; });
+    t.replaceChildren(...one(), ...one());
+  }
+
+  /* pinned story: real data from one answered and one refused question */
+  async function story() {
+    const A = await probe(EX[0]), B = await probe('How do I protect against CSRF attacks?');
+    const src = A.sources.find(s => s.id === A.answer.citations[0].id) || A.sources[0];
+    const doc = await (await fetch('/api/doc?file=' + encodeURIComponent(src.file))).json(); const text = doc.text;
+    const body = src.text.slice(src.text.indexOf('\n') + 1).trim(); const pi = text.indexOf(body);
+    // 0: a page cut into passages (real headings from this page)
+    const lines = text.split('\n'); let ls = 0; for (let i = 0, o = 0; i < lines.length; i++) { if (o + lines[i].length >= pi) { ls = i; break; } o += lines[i].length + 1; }
+    const from = Math.max(0, ls - 8); const win = lines.slice(from, from + 22); const blocks = []; let cur = [];
+    for (const l of win) { if (/^#{2,3}\s/.test(l) && cur.length) { blocks.push(cur); cur = []; } cur.push(l); } if (cur.length) blocks.push(cur);
+    $('pn0h').textContent = nice(src.file) + ' · cut at headings';
+    $('pn0b').replaceChildren(...blocks.map((b, i) => { const d = document.createElement('div'); d.className = 'blk'; d.textContent = b.slice(0, 7).join('\n').trim(); const m = b.find(l => /^#{2,3}\s/.test(l)); if (m) { const e = document.createElement('em'); e.textContent = m.replace(/^#+\s*/, '').slice(0, 26); d.append(e); } return d; }));
+    // 1: five passages with real scores
+    $('pn1h').textContent = 'Top five passages for: ' + EX[0]; const max = Math.max(...A.sources.map(s => s.score));
+    $('pn1b').replaceChildren(...A.sources.map((s, i) => { const d = document.createElement('div'); d.className = 'pc' + (i === 0 ? ' top' : ''); d.innerHTML = '<span class="no"></span><span class="t"></span><span class="bt"><i></i></span>'; d.querySelector('.no').textContent = i + 1; const t = d.querySelector('.t'); t.textContent = s.heading || nice(s.file); const sm = document.createElement('small'); sm.textContent = nice(s.file) + ' · score ' + s.score; t.append(sm); d.querySelector('i').style.width = Math.round(s.score / max * 100) + '%'; return d; }));
+    // 2: coverage gauge, answered vs refused
+    const TH = 0.5; const row = (q, r) => { const c = r.answer.confidence || 0; const d = document.createElement('div'); d.className = 'row'; d.innerHTML = '<div><div class="q"></div><div class="trk"><i></i><u></u></div></div><div class="v"></div>'; d.querySelector('.q').textContent = q; const sm = document.createElement('small'); sm.textContent = r.answer.abstained ? (r.answer.reason === 'unknown_terms' ? 'unknown words in the question' : 'too little coverage') : 'covers enough, so it answers'; d.querySelector('.q').append(sm); d.querySelector('i').style.width = Math.min(100, c * 100) + '%'; d.querySelector('u').style.left = TH * 100 + '%'; const v = d.querySelector('.v'); v.textContent = c.toFixed(2); const res = document.createElement('div'); res.className = 'res ' + (r.answer.abstained ? 'n' : 'y'); res.textContent = r.answer.abstained ? 'REFUSED' : 'ANSWERS'; v.append(res); return d; };
+    $('pn2b').replaceChildren(row(EX[0], A), row('How do I protect against CSRF attacks?', B));
+    // 3: the mark
+    const sentence = A.answer.text.split(/(?<=[.!?])\s+/)[0]; const ai = text.indexOf(sentence);
+    $('pn3h').textContent = 'Source 1 · ' + nice(src.file); const ans = $('pn3a'); const m = document.createElement('mark'); m.textContent = A.answer.text; ans.replaceChildren(m);
+    const tl = text.split('\n'); let off = 0; const offs = tl.map(l => { const o = off; off += l.length + 1; return o; }); const hl = offs.findIndex((o, i) => o + tl[i].length >= ai); const f2 = Math.max(0, hl - 2); const sh = $('pn3b'); sh.replaceChildren();
+    for (let i = f2; i < Math.min(tl.length, f2 + 13); i++) { const row2 = document.createElement('div'); row2.className = 'ln'; const n = document.createElement('span'); n.className = 'n'; n.textContent = i + 1; const c = document.createElement('span'); c.className = 'c'; const s2 = offs[i]; if (ai >= 0 && s2 <= ai && ai < s2 + tl[i].length + 1) { const a = ai - s2; c.append(document.createTextNode(tl[i].slice(0, a))); const mk = document.createElement('mark'); mk.textContent = tl[i].slice(a, a + sentence.length); c.append(mk, document.createTextNode(tl[i].slice(a + sentence.length))); } else c.textContent = tl[i] || ' '; row2.append(n, c); sh.append(row2); }
+    sh.className = 'pg-s sp-sheet on';
+    // scroll driver
+    const sec = $('story'), steps = [...$('steps').children], pns = [0, 1, 2, 3].map(i => $('pn' + i));
+    let last = -1;
+    const tick = () => {
+      if (root.dataset.view === 'land') {
+        const r = sec.getBoundingClientRect(); const p = Math.max(0, Math.min(1, -r.top / (r.height - innerHeight)));
+        $('prog').style.width = (p * 100) + '%'; const k = Math.min(3, Math.floor(p * 4));
+        if (k !== last) { last = k; steps.forEach((s, i) => s.classList.toggle('on', i === k)); pns.forEach((n, i) => n.classList.toggle('on', i === k)); sh.classList.toggle('hit', k === 3); }
+      }
+      requestAnimationFrame(tick);
+    };
+    tick();
+  }
+
   addEventListener('load', async () => {
     await wait(150);
     fetch('/api/health').then(r => r.json()).then(h => { $('nChunks').textContent = h.chunks; $('nDocs').textContent = h.docs; }).catch(() => {});
+    marquee().catch(() => {}); story().catch(() => {});
     let results; try { results = await Promise.all(QS.map(run)); } catch { return; }
     for (let k = 0; ; k = (k + 1) % QS.length) { await play(QS[k], results[k]); if (still) break; await wait(5200); while (root.dataset.view !== 'land') await wait(800); }
   });
