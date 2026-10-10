@@ -187,3 +187,4 @@ async function ask(question) {
 }
 
 $('form').addEventListener('submit', e => { e.preventDefault(); const q = $('q').value.trim(); if (!q) return; if (mineTab && !collection) { $('mineErr').textContent = 'Index your documents first, then ask.'; return; } ask(q); });
+document.querySelector('.brand').addEventListener('click', e => { e.preventDefault(); setTab(false); closeNav(); $('q').focus(); });
