@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: documind
+    runtime: node
+    plan: free
+    buildCommand: npm test
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      # Optional. Without it the app runs in extractive mode (no text is generated).
+      - key: GEMINI_API_KEY
+        sync: false

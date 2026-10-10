@@ -1,42 +1,423 @@
 [
-{"id":"q01","type":"paraphrase","question":"My catch-all error middleware never fires for unknown URLs. Why?","answer":"A 404 is not an error in Express; it just means no middleware or route responded. Add a normal middleware at the bottom of the stack to handle it.","evidence":["404 responses are not the result of an error"]},
-{"id":"q02","type":"lookup","question":"How many arguments must an error-handling middleware function declare?","answer":"Four: (err, req, res, next).","evidence":["error-handling functions have four arguments instead of three"]},
-{"id":"q03","type":"lookup","question":"What Node.js version does Express 5 require?","answer":"Node.js 18 or higher.","evidence":["requires Node.js 18 or higher"]},
-{"id":"q04","type":"lookup","question":"Does Express come with a database or models layer?","answer":"No. Express has no notion of a database; that is left to third-party Node modules.","evidence":["Express has no notion of a database"]},
-{"id":"q05","type":"lookup","question":"Which built-in middleware serves images, CSS and JavaScript files?","answer":"express.static.","evidence":["use the `express.static` built-in middleware function"]},
-{"id":"q06","type":"paraphrase","question":"Why would my static files break if I start the server from a different folder?","answer":"The path given to express.static is relative to the directory the node process was launched from, so use an absolute path.","evidence":["is relative to the directory from where you launch your `node` process"]},
-{"id":"q07","type":"lookup","question":"When I register several static directories, which one is searched first?","answer":"They are searched in the order they were registered with express.static.","evidence":["Express looks up the files in the order in which you set the static directories"]},
-{"id":"q08","type":"lookup","question":"What is the default value of the trust proxy setting?","answer":"false: the app is treated as directly facing the client and the IP comes from req.socket.remoteAddress.","evidence":["If `false`, the app is understood as directly facing the client"]},
-{"id":"q09","type":"lookup","question":"When trust proxy is a number, how is the client address chosen?","answer":"The address at most n hops away from the app is used; req.socket.remoteAddress is the first hop and the rest come from X-Forwarded-For right to left.","evidence":["Use the address that is at most `n` number of hops away"]},
-{"id":"q10","type":"paraphrase","question":"Which request header does req.hostname come from when the app sits behind a reverse proxy with trust proxy enabled?","answer":"X-Forwarded-Host.","evidence":["`X-Forwarded-Host` header, which can be set by the client or by the proxy"]},
-{"id":"q11","type":"lookup","question":"How do I turn on all of Express's internal debug logs?","answer":"Set the DEBUG environment variable to express:*,router,router:* when launching the app.","evidence":["set the `DEBUG` environment variable to `express:*,router,router:*`"]},
-{"id":"q12","type":"paraphrase","question":"How can I make the process wait for me to attach a debugger before running any code?","answer":"Start it with --inspect-brk, which pauses on the first line until a debugger attaches.","evidence":["use `--inspect-brk` instead"]},
-{"id":"q13","type":"lookup","question":"Why is setting NODE_DEBUG to http risky?","answer":"The output can expose sensitive data such as authentication headers, so use it only in development.","evidence":["this output can expose sensitive data such as authentication headers"]},
-{"id":"q14","type":"multi-doc","question":"What happens to a request if my middleware neither responds nor calls next?","answer":"The request is left hanging.","evidence":["Otherwise, the request will be left hanging"]},
-{"id":"q15","type":"lookup","question":"How do I skip the remaining handlers of a route and move to the next matching route?","answer":"Call next('route').","evidence":["Call `next('route')` to skip the remaining middleware functions"]},
-{"id":"q16","type":"lookup","question":"How do I leave a Router and pass control back to the app?","answer":"Call next('router').","evidence":["Use `next('router')` to skip the rest of the router's middleware functions"]},
-{"id":"q17","type":"multi-doc","question":"What happens to errors thrown inside async route handlers in Express 5?","answer":"Handlers and middleware that return a Promise call next(value) automatically when they reject or throw, so the error reaches Express.","evidence":["Route handlers and middleware that return a Promise call `next(value)`","Starting with Express 5, middleware functions that return a Promise will call `next(value)`"]},
-{"id":"q18","type":"paraphrase","question":"The response was already streaming and then something failed and I called next with an error. What does Express do?","answer":"The default error handler closes the connection and fails the request.","evidence":["the Express default error handler closes the connection and fails the request"]},
-{"id":"q19","type":"lookup","question":"How does the default error handler choose the response status code?","answer":"From err.status or err.statusCode; if that is outside 4xx or 5xx it becomes 500.","evidence":["The `res.statusCode` is set from `err.status` (or `err.statusCode`)"]},
-{"id":"q20","type":"lookup","question":"Are stack traces sent to the client in production?","answer":"No. The stack trace is not included in the production environment.","evidence":["The stack trace is not included in the production environment"]},
-{"id":"q21","type":"lookup","question":"Where should error-handling middleware be defined relative to other routes?","answer":"Last, after the other app.use() and route calls.","evidence":["You define error-handling middleware last, after other `app.use()` and routes calls"]},
-{"id":"q22","type":"paraphrase","question":"How do I report an error that happens inside a setTimeout callback?","answer":"Catch it inside the asynchronous code with try/catch and pass it to next, because Express does not catch it otherwise.","evidence":["timer, catch errors inside the asynchronous code itself"]},
-{"id":"q23","type":"paraphrase","question":"I wrote an error handler as (err, req, res) and it is being ignored. Why?","answer":"Error-handling middleware must declare all four arguments; otherwise next is treated as regular middleware and fails to handle errors.","evidence":["the `next` object will be interpreted as regular middleware and will fail to handle errors"]},
-{"id":"q24","type":"lookup","question":"Which path matching library and version does Express routing use?","answer":"path-to-regexp v8.","evidence":["path-to-regexp) v8"]},
-{"id":"q25","type":"paraphrase","question":"Can I limit a route parameter to digits with a pattern after its name?","answer":"No. Regexp characters are not supported inside string paths, so use an array of paths or a full regular expression.","evidence":["a parameter cannot be restricted with a suffix such as"]},
-{"id":"q26","type":"lookup","question":"How do I make part of a route path optional?","answer":"Wrap it in braces.","evidence":["Use braces to define optional segments in a route path"]},
-{"id":"q27","type":"lookup","question":"What type of value does a wildcard in a route path capture?","answer":"An array of path segments, not a string.","evidence":["they are captured as an array of path segments instead of a string"]},
-{"id":"q28","type":"paraphrase","question":"My sub-router cannot see the parent route's path parameters. How do I fix that?","answer":"Pass the mergeParams option to the Router constructor.","evidence":["you will need to pass the `mergeParams` option"]},
-{"id":"q29","type":"paraphrase","question":"How can I define GET, POST and PUT handlers for one path without repeating the path?","answer":"Use chainable route handlers with app.route().","evidence":["You can create chainable route handlers for a route path by using `app.route()`"]},
-{"id":"q30","type":"lookup","question":"Why does the order in which middleware is loaded matter?","answer":"Middleware loaded first is executed first, so a route that ends the cycle prevents later middleware from running.","evidence":["middleware functions that are loaded first are also executed first"]},
-{"id":"q31","type":"lookup","question":"How do I write middleware that accepts options?","answer":"Export a function that accepts an options object and returns the middleware.","evidence":["export a function which accepts an options object or other parameters"]},
-{"id":"q32","type":"paraphrase","question":"Do I have to add type annotations to req and res in TypeScript when I pass the handler straight to a route?","answer":"No. Express infers the types of req, res and next in that case; annotate only separately defined handlers and error handlers.","evidence":["Express infers the types of `req`, `res`, and `next`"]},
-{"id":"q33","type":"lookup","question":"Which Node.js version can run .ts files directly?","answer":"Node.js 22.18.0 or higher (or 23.6.0 or higher on v23) with TypeScript 5.8 or higher.","evidence":["Running `.ts` files directly requires Node.js >= 22.18.0"]},
-{"id":"q34","type":"lookup","question":"Does the view engine cache store the rendered output of a template?","answer":"No. It caches only the template itself; the view is re-rendered on every request.","evidence":["The view engine cache does not cache the contents of the template's output"]},
-{"id":"q35","type":"lookup","question":"What function must a template engine export so res.render can use it?","answer":"A function named __express(filePath, options, callback).","evidence":["export a function named `__express(filePath, options, callback)`"]},
-{"id":"q36","type":"unanswerable","question":"How do I deploy an Express app to AWS Lambda?","answer":"","evidence":[]},
-{"id":"q37","type":"unanswerable","question":"How do I add WebSocket support to Express?","answer":"","evidence":[]},
-{"id":"q38","type":"unanswerable","question":"Which rate-limiting middleware does Express recommend?","answer":"","evidence":[]},
-{"id":"q39","type":"unanswerable","question":"How do I set up GraphQL with Express?","answer":"","evidence":[]},
-{"id":"q40","type":"unanswerable","question":"How do I store user sessions in Redis?","answer":"","evidence":[]}
+ {
+  "id": "q01",
+  "type": "paraphrase",
+  "question": "My catch-all error middleware never fires for unknown URLs. Why?",
+  "answer": "A 404 is not an error in Express; it just means no middleware or route responded. Add a normal middleware at the bottom of the stack to handle it.",
+  "evidence": [
+   "404 responses are not the result of an error"
+  ]
+ },
+ {
+  "id": "q02",
+  "type": "lookup",
+  "question": "How many arguments must an error-handling middleware function declare?",
+  "answer": "Four: (err, req, res, next).",
+  "evidence": [
+   "error-handling functions have four arguments instead of three"
+  ]
+ },
+ {
+  "id": "q03",
+  "type": "lookup",
+  "question": "What Node.js version does Express 5 require?",
+  "answer": "Node.js 18 or higher.",
+  "evidence": [
+   "requires Node.js 18 or higher"
+  ]
+ },
+ {
+  "id": "q04",
+  "type": "lookup",
+  "question": "Does Express come with a database or models layer?",
+  "answer": "No. Express has no notion of a database; that is left to third-party Node modules.",
+  "evidence": [
+   "Express has no notion of a database"
+  ]
+ },
+ {
+  "id": "q05",
+  "type": "lookup",
+  "question": "Which built-in middleware serves images, CSS and JavaScript files?",
+  "answer": "express.static.",
+  "evidence": [
+   "use the `express.static` built-in middleware function"
+  ]
+ },
+ {
+  "id": "q06",
+  "type": "paraphrase",
+  "question": "Why would my static files break if I start the server from a different folder?",
+  "answer": "The path given to express.static is relative to the directory the node process was launched from, so use an absolute path.",
+  "evidence": [
+   "is relative to the directory from where you launch your `node` process"
+  ]
+ },
+ {
+  "id": "q07",
+  "type": "lookup",
+  "question": "When I register several static directories, which one is searched first?",
+  "answer": "They are searched in the order they were registered with express.static.",
+  "evidence": [
+   "Express looks up the files in the order in which you set the static directories"
+  ]
+ },
+ {
+  "id": "q08",
+  "type": "lookup",
+  "question": "What is the default value of the trust proxy setting?",
+  "answer": "false: the app is treated as directly facing the client and the IP comes from req.socket.remoteAddress.",
+  "evidence": [
+   "If `false`, the app is understood as directly facing the client"
+  ]
+ },
+ {
+  "id": "q09",
+  "type": "lookup",
+  "question": "When trust proxy is a number, how is the client address chosen?",
+  "answer": "The address at most n hops away from the app is used; req.socket.remoteAddress is the first hop and the rest come from X-Forwarded-For right to left.",
+  "evidence": [
+   "Use the address that is at most `n` number of hops away"
+  ]
+ },
+ {
+  "id": "q10",
+  "type": "paraphrase",
+  "question": "Which request header does req.hostname come from when the app sits behind a reverse proxy with trust proxy enabled?",
+  "answer": "X-Forwarded-Host.",
+  "evidence": [
+   "`X-Forwarded-Host` header, which can be set by the client or by the proxy"
+  ]
+ },
+ {
+  "id": "q11",
+  "type": "lookup",
+  "question": "How do I turn on all of Express's internal debug logs?",
+  "answer": "Set the DEBUG environment variable to express:*,router,router:* when launching the app.",
+  "evidence": [
+   "set the `DEBUG` environment variable to `express:*,router,router:*`"
+  ]
+ },
+ {
+  "id": "q12",
+  "type": "paraphrase",
+  "question": "How can I make the process wait for me to attach a debugger before running any code?",
+  "answer": "Start it with --inspect-brk, which pauses on the first line until a debugger attaches.",
+  "evidence": [
+   "use `--inspect-brk` instead"
+  ]
+ },
+ {
+  "id": "q13",
+  "type": "lookup",
+  "question": "Why is setting NODE_DEBUG to http risky?",
+  "answer": "The output can expose sensitive data such as authentication headers, so use it only in development.",
+  "evidence": [
+   "this output can expose sensitive data such as authentication headers"
+  ]
+ },
+ {
+  "id": "q14",
+  "type": "multi-doc",
+  "question": "What happens to a request if my middleware neither responds nor calls next?",
+  "answer": "The request is left hanging.",
+  "evidence": [
+   "Otherwise, the request will be left hanging"
+  ]
+ },
+ {
+  "id": "q15",
+  "type": "lookup",
+  "question": "How do I skip the remaining handlers of a route and move to the next matching route?",
+  "answer": "Call next('route').",
+  "evidence": [
+   "Call `next('route')` to skip the remaining middleware functions"
+  ]
+ },
+ {
+  "id": "q16",
+  "type": "lookup",
+  "question": "How do I leave a Router and pass control back to the app?",
+  "answer": "Call next('router').",
+  "evidence": [
+   "Use `next('router')` to skip the rest of the router's middleware functions"
+  ]
+ },
+ {
+  "id": "q17",
+  "type": "multi-doc",
+  "question": "What happens to errors thrown inside async route handlers in Express 5?",
+  "answer": "Handlers and middleware that return a Promise call next(value) automatically when they reject or throw, so the error reaches Express.",
+  "evidence": [
+   "Route handlers and middleware that return a Promise call `next(value)`",
+   "Starting with Express 5, middleware functions that return a Promise will call `next(value)`"
+  ]
+ },
+ {
+  "id": "q18",
+  "type": "paraphrase",
+  "question": "The response was already streaming and then something failed and I called next with an error. What does Express do?",
+  "answer": "The default error handler closes the connection and fails the request.",
+  "evidence": [
+   "the Express default error handler closes the connection and fails the request"
+  ]
+ },
+ {
+  "id": "q19",
+  "type": "lookup",
+  "question": "How does the default error handler choose the response status code?",
+  "answer": "From err.status or err.statusCode; if that is outside 4xx or 5xx it becomes 500.",
+  "evidence": [
+   "The `res.statusCode` is set from `err.status` (or `err.statusCode`)"
+  ]
+ },
+ {
+  "id": "q20",
+  "type": "lookup",
+  "question": "Are stack traces sent to the client in production?",
+  "answer": "No. The stack trace is not included in the production environment.",
+  "evidence": [
+   "The stack trace is not included in the production environment"
+  ]
+ },
+ {
+  "id": "q21",
+  "type": "lookup",
+  "question": "Where should error-handling middleware be defined relative to other routes?",
+  "answer": "Last, after the other app.use() and route calls.",
+  "evidence": [
+   "You define error-handling middleware last, after other `app.use()` and routes calls"
+  ]
+ },
+ {
+  "id": "q22",
+  "type": "paraphrase",
+  "question": "How do I report an error that happens inside a setTimeout callback?",
+  "answer": "Catch it inside the asynchronous code with try/catch and pass it to next, because Express does not catch it otherwise.",
+  "evidence": [
+   "timer, catch errors inside the asynchronous code itself"
+  ]
+ },
+ {
+  "id": "q23",
+  "type": "paraphrase",
+  "question": "I wrote an error handler as (err, req, res) and it is being ignored. Why?",
+  "answer": "Error-handling middleware must declare all four arguments; otherwise next is treated as regular middleware and fails to handle errors.",
+  "evidence": [
+   "the `next` object will be interpreted as regular middleware and will fail to handle errors"
+  ]
+ },
+ {
+  "id": "q24",
+  "type": "lookup",
+  "question": "Which path matching library and version does Express routing use?",
+  "answer": "path-to-regexp v8.",
+  "evidence": [
+   "path-to-regexp) v8"
+  ]
+ },
+ {
+  "id": "q25",
+  "type": "paraphrase",
+  "question": "Can I limit a route parameter to digits with a pattern after its name?",
+  "answer": "No. Regexp characters are not supported inside string paths, so use an array of paths or a full regular expression.",
+  "evidence": [
+   "a parameter cannot be restricted with a suffix such as"
+  ]
+ },
+ {
+  "id": "q26",
+  "type": "lookup",
+  "question": "How do I make part of a route path optional?",
+  "answer": "Wrap it in braces.",
+  "evidence": [
+   "Use braces to define optional segments in a route path"
+  ]
+ },
+ {
+  "id": "q27",
+  "type": "lookup",
+  "question": "What type of value does a wildcard in a route path capture?",
+  "answer": "An array of path segments, not a string.",
+  "evidence": [
+   "they are captured as an array of path segments instead of a string"
+  ]
+ },
+ {
+  "id": "q28",
+  "type": "paraphrase",
+  "question": "My sub-router cannot see the parent route's path parameters. How do I fix that?",
+  "answer": "Pass the mergeParams option to the Router constructor.",
+  "evidence": [
+   "you will need to pass the `mergeParams` option"
+  ]
+ },
+ {
+  "id": "q29",
+  "type": "paraphrase",
+  "question": "How can I define GET, POST and PUT handlers for one path without repeating the path?",
+  "answer": "Use chainable route handlers with app.route().",
+  "evidence": [
+   "You can create chainable route handlers for a route path by using `app.route()`"
+  ]
+ },
+ {
+  "id": "q30",
+  "type": "lookup",
+  "question": "Why does the order in which middleware is loaded matter?",
+  "answer": "Middleware loaded first is executed first, so a route that ends the cycle prevents later middleware from running.",
+  "evidence": [
+   "middleware functions that are loaded first are also executed first"
+  ]
+ },
+ {
+  "id": "q31",
+  "type": "lookup",
+  "question": "How do I write middleware that accepts options?",
+  "answer": "Export a function that accepts an options object and returns the middleware.",
+  "evidence": [
+   "export a function which accepts an options object or other parameters"
+  ]
+ },
+ {
+  "id": "q32",
+  "type": "paraphrase",
+  "question": "Do I have to add type annotations to req and res in TypeScript when I pass the handler straight to a route?",
+  "answer": "No. Express infers the types of req, res and next in that case; annotate only separately defined handlers and error handlers.",
+  "evidence": [
+   "Express infers the types of `req`, `res`, and `next`"
+  ]
+ },
+ {
+  "id": "q33",
+  "type": "lookup",
+  "question": "Which Node.js version can run .ts files directly?",
+  "answer": "Node.js 22.18.0 or higher (or 23.6.0 or higher on v23) with TypeScript 5.8 or higher.",
+  "evidence": [
+   "Running `.ts` files directly requires Node.js >= 22.18.0"
+  ]
+ },
+ {
+  "id": "q34",
+  "type": "lookup",
+  "question": "Does the view engine cache store the rendered output of a template?",
+  "answer": "No. It caches only the template itself; the view is re-rendered on every request.",
+  "evidence": [
+   "The view engine cache does not cache the contents of the template's output"
+  ]
+ },
+ {
+  "id": "q35",
+  "type": "lookup",
+  "question": "What function must a template engine export so res.render can use it?",
+  "answer": "A function named __express(filePath, options, callback).",
+  "evidence": [
+   "export a function named `__express(filePath, options, callback)`"
+  ]
+ },
+ {
+  "id": "q36",
+  "type": "unanswerable",
+  "question": "How do I deploy an Express app to AWS Lambda?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q37",
+  "type": "unanswerable",
+  "question": "How do I add WebSocket support to Express?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q38",
+  "type": "unanswerable",
+  "question": "Which rate-limiting middleware does Express recommend?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q39",
+  "type": "unanswerable",
+  "question": "How do I set up GraphQL with Express?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q40",
+  "type": "unanswerable",
+  "question": "How do I store user sessions in Redis?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q41",
+  "type": "unanswerable",
+  "question": "How do I handle file uploads with multer?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q42",
+  "type": "unanswerable",
+  "question": "How do I serve Express over HTTPS with a TLS certificate?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q43",
+  "type": "unanswerable",
+  "question": "How do I implement JWT authentication?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q44",
+  "type": "unanswerable",
+  "question": "How do I run an Express app inside a Docker container?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q45",
+  "type": "unanswerable",
+  "question": "How do I protect against CSRF attacks?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q46",
+  "type": "unanswerable",
+  "question": "How do I enable gzip compression for responses?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q47",
+  "type": "unanswerable",
+  "question": "How do I run Express in cluster mode across CPU cores?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q48",
+  "type": "unanswerable",
+  "question": "How do I write integration tests for my routes with supertest?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q49",
+  "type": "unanswerable",
+  "question": "How do I set a cookie on the response with res.cookie?",
+  "answer": "",
+  "evidence": []
+ },
+ {
+  "id": "q50",
+  "type": "unanswerable",
+  "question": "How do I limit the maximum request body size?",
+  "answer": "",
+  "evidence": []
+ }
 ]

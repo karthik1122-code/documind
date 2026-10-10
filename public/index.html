@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocuMind · Ask the docs, with receipts</title>
+<meta name="description" content="Question answering over the Express 5 documentation. Every answer cites its source passage, and questions the docs do not cover are refused.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f3d36'/%3E%3Cpath d='M9 10h9a5 5 0 0 1 0 10H9zM9 20h10' fill='none' stroke='%23f4efe6' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" aria-label="DocuMind home"><span class="mark" aria-hidden="true"></span>DocuMind</a>
+  <span class="mode" id="mode" title="How answers are produced">Checking…</span>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="eyebrow">Retrieval-augmented Q&amp;A · evaluated, not guessed</p>
+    <h1>Ask the Express 5 docs.<br><em>Get the passage, not a guess.</em></h1>
+    <p class="lede">Every answer points to the exact paragraph it came from. If the docs don't cover your question, DocuMind says so instead of making something up.</p>
+
+    <form id="form" class="ask" autocomplete="off">
+      <label for="q" class="sr">Your question</label>
+      <input id="q" name="q" type="text" maxlength="400" placeholder="e.g. Why doesn't my error handler catch 404s?" required>
+      <button id="go" type="submit">Ask</button>
+    </form>
+    <div class="chips" id="chips" aria-label="Example questions"></div>
+  </section>
+
+  <section class="result" id="result" aria-live="polite" hidden>
+    <article class="answer" id="answer"></article>
+    <div class="sources" id="sources"></div>
+  </section>
+
+  <section class="how">
+    <h2>How it works</h2>
+    <ol>
+      <li><b>Chunk</b><span>Pages are split at headings, so an answer stays in one piece.</span></li>
+      <li><b>Retrieve</b><span>Keyword search and a local semantic index vote, then a reranker orders the top passages.</span></li>
+      <li><b>Answer</b><span>Only from those passages, with citations. Unknown words or weak matches mean a refusal.</span></li>
+    </ol>
+    <p class="note">Measured on a 50-question set written for this corpus: see the repository's <code>eval/results</code> for the tables and their limits.</p>
+  </section>
+</main>
+
+<footer>
+  <p>Corpus: Express 5 documentation, © The Express Contributors, <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a>. This project is not affiliated with or endorsed by Express.</p>
+</footer>
+<script src="/app.js" type="module"></script>
+</body>
+</html>

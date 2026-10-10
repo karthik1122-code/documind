@@ -1,31 +1,42 @@
 # DocuMind
 
-Question answering over documentation, built **evaluation-first**: the question set and the metrics exist before the pipeline, so every design choice is measured instead of guessed.
+Question answering over documentation, built **evaluation-first**: the question set and the metrics came before the pipeline, so every design choice is measured instead of guessed. Answers cite their source passage, and questions the docs do not cover are refused.
 
-**Status:** retrieval evaluation harness and BM25 baseline are done. Embeddings, hybrid search, reranking, the answer step and the chat UI are next (see the roadmap).
+**What it is:** a retrieval pipeline (chunking, keyword search, a local semantic index, rank fusion, a reranker), an answer step with abstention, a streaming chat UI, and the evaluation harness that decided each part.
+**What it is not (yet):** a model-generated answer system measured end to end. That needs a model key; the scripts are written and tested with mocks, and the numbers are marked pending below.
 
-## The corpus
+## Quick start
 
-The 16 English pages of the Express 5 guide, starter and advanced docs, copied unchanged into `corpus/`. They are published by the Express project under [CC BY 4.0](corpus/LICENSE.md) (source: github.com/expressjs/expressjs.com). This project is not affiliated with or endorsed by Express.
+Requires Node 22 or newer. No dependencies.
 
-## The evaluation set
+```bash
+npm test            # 23 tests, including the evaluation gates
+npm start           # http://localhost:4180 (extractive mode, no key needed)
+GEMINI_API_KEY=... npm start   # generates answers from retrieved passages only
+```
 
-`eval/questions.json` has 40 hand-written questions:
+## The corpus and the question set
+
+The 16 English pages of the Express 5 guide, starter and advanced docs, copied unchanged into `corpus/`. Published by the Express project under [CC BY 4.0](corpus/LICENSE.md) (source: github.com/expressjs/expressjs.com). Not affiliated with or endorsed by Express.
+
+`eval/questions.json` has 50 hand-written questions:
 
 | Type | Count | What it tests |
 |---|---|---|
 | lookup | 22 | wording close to the docs |
 | paraphrase | 11 | different words than the docs ("my handler is ignored" vs "four arguments") |
-| multi-doc | 2 | the answer appears in more than one page |
-| unanswerable | 5 | the docs do not cover it, so the right answer is "I don't know" |
+| multi-doc | 2 | the answer appears on more than one page |
+| unanswerable | 15 | the docs do not cover it, so the right reply is a refusal (some are near-misses, e.g. the docs mention Redis, gzip middleware and cookies, but never answer these) |
 
-Every answerable question has an **evidence phrase** copied from the corpus. A retrieved chunk counts as relevant if it contains that phrase. `npm run verify:questions` checks that every phrase really exists, and it runs in `npm test`. Because relevance is judged on text and not on chunk ids, different chunking strategies can be compared fairly.
+Every answerable question carries an **evidence phrase** copied from the corpus. A retrieved chunk is relevant if it contains the phrase, so different chunkings are compared fairly. `eval/verify-questions.mjs` checks that every phrase exists, and it runs in `npm test`.
 
-The questions were written by the author, so this is a small, controlled benchmark. It is not a claim about performance on other documentation.
+**Limits:** the questions were written by the author for one corpus. With 35 answerable questions, one question is worth 2.9 percentage points, so small differences below are noise. This is a controlled benchmark, not a claim about other documentation.
 
-## Results: BM25 baseline (keyword search only)
+## Results
 
-`npm run eval` reproduces this table. Numbers are over the 35 answerable questions.
+### 1. Chunking (keyword search only)
+
+Bigger chunks look better because they simply contain more text, so the table also shows the cost: characters handed to the model per question.
 
 | Chunking | Chunks | recall@1 | recall@3 | recall@5 | MRR | Context at k=3 (chars) |
 |---|---|---|---|---|---|---|
@@ -35,29 +46,87 @@ The questions were written by the author, so this is a small, controlled benchma
 | sections 800 | 198 | 65.7% | 80.0% | 88.6% | 0.739 | 2229 |
 | sections 1600 | 114 | 68.6% | 80.0% | 94.3% | 0.776 | 3494 |
 
-What this shows:
+At about 2.2K characters of context, splitting at headings (and prefixing each chunk with its page title and heading) beats fixed windows on recall@1 (65.7% vs 51.4%) and recall@3 (80.0% vs 74.3%). The pipeline uses **sections 800**.
 
-1. **Bigger chunks look better but cost more.** Recall rises with chunk size because a larger chunk is more likely to contain the evidence. The last column shows what that costs: fixed 1600 hands the model about 4.6K characters per question, four times the 400-character setting.
-2. **Structure-aware chunking wins at equal cost.** At about 2.2K characters of context, sections 800 beats fixed 800 on recall@1 (65.7% vs 51.4%) and recall@3 (80.0% vs 74.3%). Splitting on headings, and prefixing each chunk with its page title and heading, keeps an answer in one piece.
-3. **Paraphrased questions are the weak spot for keyword search.** In the best configuration (fixed 1600) two questions, q01 and q23, are still missed at k=5, and both reword the docs heavily. This is what embeddings and hybrid search are meant to fix, and the next step measures whether they do.
-4. **A score threshold cannot reliably tell "not covered" from "covered".** In that same configuration the highest BM25 score on an unanswerable question (9.1) is higher than the lowest on an answerable one (6.2), because words like "express" and "Redis" still match. Deciding when to abstain needs the answer step plus its own evaluation.
+### 2. Retrieval methods (sections 800)
+
+All settings are standard defaults chosen before looking at results (BM25 k1=1.2 b=0.75, RRF c=60, LSA 50 dimensions, fixed reranker weights). Nothing was tuned on the questions. `npm run eval:ablation` reproduces it, and `eval/results/ablation.md` also has sections 1600.
+
+| Method | recall@1 | recall@3 | recall@5 | MRR | paraphrase recall@3 | Misses at k=5 |
+|---|---|---|---|---|---|---|
+| BM25 | 65.7% | 80.0% | 88.6% | 0.739 | 72.7% | q01, q06, q14, q23 |
+| BM25 + stemming | 65.7% | 82.9% | 91.4% | 0.758 | 63.6% | q01, q23, q25 |
+| Hashed n-gram vectors | 40.0% | 62.9% | 77.1% | 0.538 | 45.5% | q01, q02, q17, q18, q23, q26, q27, q30 |
+| LSA (50 dims) | 54.3% | 74.3% | 88.6% | 0.663 | 54.5% | q01, q23, q30, q35 |
+| Hybrid: BM25s + LSA (RRF) | 57.1% | 82.9% | 94.3% | 0.714 | 63.6% | q01, q23 |
+| Hybrid: BM25s + LSA + hash (RRF) | 60.0% | 82.9% | 91.4% | 0.703 | 63.6% | q01, q23, q26 |
+| BM25s + reranker | 68.6% | 85.7% | 91.4% | 0.769 | 54.5% | q01, q23, q25 |
+| Hybrid BM25s + LSA + reranker | 71.4% | 85.7% | 91.4% | 0.784 | 54.5% | q01, q23, q25 |
+
+What the table says, without over-reading it:
+
+- **Hybrid helps recall at depth.** BM25 + stemming + LSA fused with RRF reaches 94.3% recall@5 versus 88.6% for plain BM25.
+- **The reranker helps the top spot.** Adding it gives the best recall@1 (71.4%) and MRR (0.784).
+- **The cheap "embedding" baselines are not magic.** Hashed n-gram vectors are worse than BM25. LSA alone is about the same as BM25 at k=5.
+- **The hard paraphrases stay hard.** q01 and q23 are missed by every local method because they share almost no words with the answer. That is the case for a neural embedding model, and `npm run eval:gemini` adds those rows once a key is available.
+- **Differences of one or two questions are noise** at this sample size.
+
+### 3. Answering and refusing (no model key)
+
+The default mode copies the best-matching sentence and refuses when coverage is too low or the question uses words that never appear in the docs. The refusal setting was chosen on the first half of the questions and is reported on the second half, which was not used to choose it.
+
+**Held-out half:**
+
+| Min coverage | Max unknown-word share | Answerable answered correctly | Answered wrongly | Unanswerable refused | False answers | Balanced accuracy |
+|---|---|---|---|---|---|---|
+| 0.5 | 0.15 | 24% | 1 | 100% | 0 | 62% |
+
+**All 50 questions:**
+
+| Min coverage | Max unknown-word share | Answerable answered correctly | Answered wrongly | Unanswerable refused | False answers | Balanced accuracy |
+|---|---|---|---|---|---|---|
+| 0.5 | 0.15 | 29% | 4 | 100% | 0 | 64% |
+
+Summary: the extractive mode **never answered an uncovered question** on the 15 unanswerable questions, but it **answers under a third of the answerable ones correctly**. It is safe and conservative, not smart. Sentence matching cannot bridge paraphrases, which is exactly what a generated answer is for. `npm test` fails if it ever answers an unanswerable question.
+
+### 4. Model-generated answers (pending)
+
+`npm run eval:llm` scores a model answering from the retrieved passages only, with citations: correctness, refusal on the 15 unanswerable questions, citation of the right passage, and 18 prompt-injection attempts (instructions hidden inside retrieved passages). The Gemini adapter (`src/providers.mjs`) is covered by unit tests against a mocked server, including header-only key handling, batching and stream parsing, but **has not been run against the live service**. No numbers are claimed until it has.
+
+## How it works
+
+```
+question
+  -> BM25 (stemmed)  ┐
+                     ├-> reciprocal rank fusion -> feature reranker -> top 5 passages
+  -> LSA (local)     ┘
+  -> answer step:  extractive (default)  |  model, from passages only, with [n] citations
+  -> refuse when: unknown words, weak coverage, model says NOT_IN_DOCS, or reply has no valid citation
+```
+
+- **Prompt-injection posture:** retrieved passages are wrapped in delimiters, any delimiter text inside a passage is neutralised, the system prompt says passages are data and never instructions, and replies without a citation to a supplied passage are discarded. These are unit-tested. Whether a given model resists is what `eval:llm` measures.
+- **Server:** request bodies are capped, questions are limited to 400 characters, an in-memory limiter allows 20 questions a minute per address, only `public/` is served, and a strict content security policy is set.
+
+## Layout
+
+```
+corpus/            the 16 Express 5 pages + licence
+eval/              questions, verification, retrieval + answer evaluations, results/
+src/               chunk, bm25, stem, lsa, hashvec, hybrid, rerank, answer, providers, pipeline
+public/            the chat UI
+server.mjs         streaming API (server-sent events) + static files
+```
+
+## Deploying
+
+`render.yaml` and a `Dockerfile` are included (no runtime dependencies). They have not been deployed or built yet. `GEMINI_API_KEY` is optional and must be set in the host's environment, never committed.
 
 ## Roadmap
 
-- [x] Corpus, 40-question evaluation set with verified evidence, metrics
-- [x] Chunking strategies and BM25 baseline
-- [ ] Embeddings + pgvector, compared against BM25
-- [ ] Hybrid search (reciprocal rank fusion) and a reranker, each with a before/after row
-- [ ] Answer generation with citations, scored for faithfulness and for abstaining on the 5 unanswerable questions
-- [ ] Streaming chat UI (Next.js, Vercel AI SDK) with citations linking to the source chunk
-- [ ] Prompt-injection tests for documents that contain instructions
-
-## Run it
-
-Requires Node 22 or newer. No dependencies yet.
-
-```bash
-npm test          # unit tests + evidence verification
-npm run eval      # print the results table
-npm run eval:write  # also save eval/results/bm25-baseline.json
-```
+- [x] Corpus, 50-question evaluation set with verified evidence, metrics
+- [x] Chunking study, BM25 baseline, local semantic index, hybrid fusion, reranker
+- [x] Answer step with abstention, held-out evaluation, regression gates
+- [x] Streaming chat UI with citations
+- [ ] Neural embeddings (needs a model key): `npm run eval:gemini`
+- [ ] Model-generated answers and injection results: `npm run eval:llm`
+- [ ] Deploy
