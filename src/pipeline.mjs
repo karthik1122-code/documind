@@ -23,6 +23,8 @@ export function createPipeline({ corpusDir, docs: given, llm = null, topK = 5, m
     docCount: docs.length,
     chunkCount: chunks.length,
     docs: docs.map(d => d.file),
+    /** Full text of one indexed document, for the source reader. Null when the file is not in this pipeline. */
+    doc: file => { const d = docs.find(x => x.file === file); return d ? { file: d.file, text: d.text } : null; },
     retrieve: question => retriever.search(question, topK),
     /** Yields { type: 'sources' | 'delta' | 'answer', ... } events. */
     async *ask(question) {

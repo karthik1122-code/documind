@@ -91,6 +91,9 @@ test('your documents: index, ask with a citation, refuse an uncovered question, 
   const off = (await askIn(id, 'What is the capital of Australia?')).events.find(e => e.type === 'answer');
   assert.equal(off.abstained, true);
 
+  const mine = await (await fetch(`${base}/api/doc?file=handbook.md&collection=${id}`)).json();
+  assert.match(mine.text, /leash/i);
+
   assert.equal((await fetch(`${base}/api/collections/${id}`, { method: 'DELETE' })).status, 200);
   assert.equal((await askIn(id, 'Are dogs allowed in the lobby?')).res.status, 404);
 });
@@ -107,4 +110,13 @@ test('your documents: unknown ids, bad types, empty text and oversize uploads ar
   assert.equal((await upload(null, '{nope')).status, 400);
   const path = await upload([{ name: '../../../etc/cron.d/x.md', text: '# Hi\n\n## A\n\nBody text here.' }]);
   assert.equal(path.status, 201); assert.deepEqual((await path.json()).docs, ['x.md'], 'directory parts are stripped from names');
+});
+
+test('source reader: returns a corpus page in full, refuses unknown files and path tricks', async () => {
+  const ok = await (await fetch(`${base}/api/doc?file=guide__routing.mdx`)).json();
+  assert.equal(ok.file, 'guide__routing.mdx');
+  assert.match(ok.text, /optional segments/i);
+  assert.equal((await fetch(`${base}/api/doc?file=../server.mjs`)).status, 404);
+  assert.equal((await fetch(`${base}/api/doc?file=nope.mdx`)).status, 404);
+  assert.equal((await fetch(`${base}/api/doc?file=a.md&collection=${'0'.repeat(32)}`)).status, 404);
 });

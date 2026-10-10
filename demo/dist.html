@@ -1,305 +1,289 @@
 <title>DocuMind</title>
 <meta name="description" content="Question answering over the Express 5 docs. Every answer cites its source passage, and questions the docs do not cover are refused. Runs entirely in your browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%236b7bff'/%3E%3Cpath d='M10 9.5h6.5a6.5 6.5 0 0 1 0 13H10z' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linejoin='round'/%3E%3C/svg%3E">
-<style>:root{--bg:#f7f7f8;--rail:#f0f0f2;--panel:#fff;--raise:#fff;--ink:#16171b;--ink2:#4a4d57;--mute:#80838e;--line:#e4e4e8;--line2:#d6d6dc;--accent:#4a5af0;--accent-ink:#fff;--accent-soft:rgba(74,90,240,.1);--ok:#1c8a5a;--warn:#a96a12;--bad:#c2410c;--hl:rgba(250,204,21,.32);--shadow:0 1px 2px rgba(20,20,40,.05),0 10px 30px -14px rgba(20,20,40,.18);color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e0f12;--rail:#0a0b0d;--panel:#14161a;--raise:#181b20;--ink:#ececf0;--ink2:#b2b5bf;--mute:#7b7e89;--line:#23262d;--line2:#2f333c;--accent:#8794ff;--accent-ink:#0b0d1a;--accent-soft:rgba(135,148,255,.14);--ok:#5fd3a0;--warn:#f0c26a;--bad:#ff9a6b;--hl:rgba(250,204,21,.22);--shadow:none;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0e0f12;--rail:#0a0b0d;--panel:#14161a;--raise:#181b20;--ink:#ececf0;--ink2:#b2b5bf;--mute:#7b7e89;--line:#23262d;--line2:#2f333c;--accent:#8794ff;--accent-ink:#0b0d1a;--accent-soft:rgba(135,148,255,.14);--ok:#5fd3a0;--warn:#f0c26a;--bad:#ff9a6b;--hl:rgba(250,204,21,.22);--shadow:none;color-scheme:dark}
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230e0e10'/%3E%3Crect x='5' y='12' width='22' height='9' rx='2' fill='%23ff2e93'/%3E%3C/svg%3E">
+<style>:root{--bg:#fafaf9;--sheet:#fff;--reader:#efeff2;--ink:#0e0e10;--ink2:#55555d;--mute:#8a8a93;--line:#e3e3e7;--rule:#0e0e10;--marker:#ff2e93;--fill:rgba(255,46,147,.28);--fill-soft:rgba(255,46,147,.1);--on-ink:#fafaf9;--ok:#157a4f;--warn:#b25c00;--bad:#c2410c;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e0e10;--sheet:#151518;--reader:#09090b;--ink:#f3f2ee;--ink2:#a9a9b2;--mute:#76767f;--line:#25252a;--rule:#f3f2ee;--marker:#ff4fa3;--fill:rgba(255,79,163,.42);--fill-soft:rgba(255,79,163,.13);--on-ink:#0e0e10;--ok:#5fd3a0;--warn:#f0b35a;--bad:#ff9a6b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e0e10;--sheet:#151518;--reader:#09090b;--ink:#f3f2ee;--ink2:#a9a9b2;--mute:#76767f;--line:#25252a;--rule:#f3f2ee;--marker:#ff4fa3;--fill:rgba(255,79,163,.42);--fill-soft:rgba(255,79,163,.13);--on-ink:#0e0e10;--ok:#5fd3a0;--warn:#f0b35a;--bad:#ff9a6b;color-scheme:dark}
 *{box-sizing:border-box}html,body{height:100%}html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-button{font:inherit;color:inherit}
-svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 'Bricolage Grotesque',system-ui,sans-serif;font-variation-settings:'opsz' 14,'wdth' 100;-webkit-font-smoothing:antialiased}
+button,select,textarea{font:inherit;color:inherit}
+svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-kbd{font:500 11px 'JetBrains Mono',monospace;color:var(--mute);border:1px solid var(--line2);border-radius:5px;padding:0 5px;margin-left:auto}
+:focus-visible{outline:2px solid var(--marker);outline-offset:2px}
+kbd{font:500 10.5px 'DM Mono',monospace;opacity:.6;border:1px solid currentColor;border-radius:3px;padding:0 4px;margin-left:8px}
+.mono{font-family:'DM Mono',monospace}
 
-.app{display:grid;grid-template-columns:268px minmax(0,1fr);height:100%}
-.rail{overflow-x:hidden;background:var(--rail);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:6px;min-height:0;overflow:auto}
-.brand{display:flex;align-items:center;gap:10px;font:600 16px Inter,sans-serif;letter-spacing:-.01em;color:var(--ink);text-decoration:none;padding:4px 8px 14px}
-.mark{width:22px;height:22px;border-radius:7px;background:var(--accent);position:relative}
-.mark::after{content:"";position:absolute;inset:5px 5px 5px 6px;border:2px solid var(--accent-ink);border-left-color:transparent;border-radius:0 7px 7px 0}
-.newq{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--line2);background:var(--panel);border-radius:10px;padding:8px 10px;cursor:pointer;font-weight:500}
-.newq:hover{border-color:var(--accent)}
-.grp{margin:16px 8px 4px;font:500 12px Inter,sans-serif;color:var(--mute)}
-.lib{display:grid;gap:2px}
-.src-btn{display:flex;align-items:center;gap:10px;border:0;background:transparent;border-radius:8px;padding:7px 8px;cursor:pointer;color:var(--ink2);text-align:left}
-.src-btn span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.src-btn i{font:400 11px 'JetBrains Mono',monospace;color:var(--mute);font-style:normal}
-.src-btn:hover{background:var(--accent-soft)}.src-btn.on{background:var(--accent-soft);color:var(--ink)}.src-btn.on svg{color:var(--accent)}
-.hist{list-style:none;margin:0;padding:0;display:grid;gap:1px;min-height:0}
-.hist li{border-radius:8px;min-width:0}
-.hist{min-width:0}
-.hist li.none{color:var(--mute);padding:6px 8px;font-size:13px}
-.hist button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:6px 8px;border-radius:8px;color:var(--ink2);cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px}
-.hist button:hover{background:var(--accent-soft);color:var(--ink)}
-.railfoot{margin-top:auto;padding:12px 8px 0;border-top:1px solid var(--line)}
-.railfoot p{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:var(--mute)}.railfoot a{color:inherit}
-.linkbtn{border:0;background:none;padding:0;cursor:pointer;color:var(--ink2);font-weight:500;font-size:13px}.linkbtn:hover{color:var(--accent)}
+/* the marker */
+.hl,mark,.mk{background:linear-gradient(104deg,transparent 0.6%,var(--fill) 2%,var(--fill) 97%,transparent 99%);border-radius:.3em .6em .35em .55em;-webkit-box-decoration-break:clone;box-decoration-break:clone;padding:.02em .12em}
+.hl{background-size:0% 100%;background-repeat:no-repeat;background-image:linear-gradient(transparent 34%,var(--fill) 34% 94%,transparent 94%);animation:sweep .9s .35s cubic-bezier(.6,.05,.2,1) forwards}
+@keyframes sweep{to{background-size:100% 100%}}
+@media (prefers-reduced-motion:reduce){.hl{animation:none;background-size:100% 100%}}
 
-.col{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%}
-.topbar{display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border-bottom:1px solid var(--line);flex:none}
-.crumb{display:flex;gap:8px;align-items:center;min-width:0;flex:1;font-size:13.5px;color:var(--mute)}
-.crumb b{color:var(--ink);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.crumb .sep{opacity:.5}.crumb span:first-child{white-space:nowrap}
-.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);border-radius:999px;padding:3px 10px;font:500 12px 'JetBrains Mono',monospace;color:var(--ink2);white-space:nowrap}
-.chip .dot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
-.icon{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line2);background:transparent;border-radius:8px;cursor:pointer;color:var(--ink2)}.icon:hover{border-color:var(--accent);color:var(--ink)}
-.menu{display:none}
+.app{display:flex;flex-direction:column;height:100%}
+.bar{display:flex;align-items:center;gap:18px;height:56px;padding:0 20px;border-bottom:2px solid var(--rule);flex:none;background:var(--bg)}
+.word{font:800 22px/1 'Bricolage Grotesque';font-variation-settings:'opsz' 36,'wdth' 88;letter-spacing:-.03em;color:var(--ink);text-decoration:none;white-space:nowrap}
+.word .mk{padding:.02em .1em}
+.seg{display:flex;border:1.5px solid var(--rule);border-radius:4px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:6px 14px;font-weight:500;font-size:14px;cursor:pointer;white-space:nowrap}
+.seg button+button{border-left:1.5px solid var(--rule)}
+.seg .on{background:var(--ink);color:var(--on-ink)}
+.grow{flex:1}
+.modeline{font:400 12px 'DM Mono',monospace;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.txtbtn{border:0;background:none;cursor:pointer;font-weight:500;font-size:14px;padding:6px 2px;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px}
+.txtbtn:hover{text-decoration-color:var(--marker)}
+.icon{width:32px;height:32px;display:grid;place-items:center;border:1.5px solid var(--rule);background:transparent;border-radius:4px;cursor:pointer}
+.icon:hover{background:var(--fill-soft)}
 
-main{flex:1;min-height:0;display:flex;flex-direction:column;overflow:auto;padding:0 20px;scroll-behavior:smooth}
-main:focus{outline:0}
-.greet,.mine,.thread,.dock{width:100%;max-width:760px;margin-left:auto;margin-right:auto}
-.app.empty main{justify-content:center;padding-bottom:6vh}
-.greet{text-align:left;padding:28px 0 22px}
-.app:not(.empty) .greet{display:none}
-h1{font:600 clamp(26px,4vw,38px)/1.15 Inter,sans-serif;letter-spacing:-.03em;margin:0 0 10px;text-wrap:balance}
-.greet p{margin:0;color:var(--ink2);max-width:56ch}
-.thread{display:grid;gap:44px;padding:28px 0 24px}
-.app.empty .thread{display:none}
-.dock{position:sticky;bottom:0;padding:10px 0 18px;background:linear-gradient(to top,var(--bg) 78%,transparent)}
-.app.empty .dock{position:static;background:none;padding:0}
-.composer{background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:12px 12px 10px 16px;box-shadow:var(--shadow);transition:border-color .15s}
-.composer:focus-within{border-color:var(--accent)}
-.composer textarea{display:block;width:100%;border:0;outline:0;resize:none;background:transparent;color:var(--ink);font:500 16px/1.5 Inter,sans-serif;padding:2px 0;max-height:140px}
-.composer textarea::placeholder{color:var(--mute);font-weight:400}
-.crow{display:flex;align-items:center;gap:10px;margin-top:8px}
-.scope{font-size:12.5px;color:var(--mute);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#go{width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:50%;background:var(--accent);color:var(--accent-ink);cursor:pointer}
-#go svg{stroke-width:2}#go:disabled{opacity:.4;cursor:default}
-.chips{display:grid;gap:0;margin-top:14px}
-.app:not(.empty) .chips{display:none}
-.chip-q{display:flex;align-items:center;gap:12px;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;padding:11px 4px;cursor:pointer;color:var(--ink2);font-size:14.5px}
-.chip-q svg{color:var(--mute)}.chip-q:hover{color:var(--ink)}.chip-q:hover svg{color:var(--accent)}
-.chips .chip-q:last-child{border-bottom:1px solid var(--line)}
+.deck{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(380px,1fr)}
+.desk{overflow:auto;display:flex;flex-direction:column;min-width:0;scroll-behavior:smooth}
+.desk-in{flex:1;width:100%;max-width:700px;margin:0 auto;padding:44px 28px 40px}
+.intro h1{font:800 clamp(40px,5.2vw,68px)/.98 'Bricolage Grotesque';font-variation-settings:'opsz' 96,'wdth' 88;letter-spacing:-.03em;margin:0 0 18px;text-wrap:balance}
+.intro p{margin:0 0 28px;max-width:46ch;color:var(--ink2);font-size:17px}
+.app.asked .intro{display:none}.app.asked .chips,.app.asked .idx{display:none}
+.app.asked .desk-in{padding-top:26px}
 
-/* turn */
-.turn{scroll-margin-top:12px}
-.turn h2{font:600 clamp(22px,3vw,28px)/1.25 Inter,sans-serif;letter-spacing:-.025em;margin:0 0 18px;text-wrap:balance}
-.trace{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:6px;font-size:13px;color:var(--mute)}
-.trace li{display:flex;align-items:center;gap:9px}
-.trace .tick{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line2);display:grid;place-items:center;flex:none}
-.trace .done .tick{background:var(--ok);border-color:var(--ok)}.trace .done .tick::after{content:"";width:4px;height:7px;border:solid var(--accent-ink);border-width:0 1.6px 1.6px 0;transform:rotate(45deg) translate(-1px,-1px)}
-.trace .run .tick{border-top-color:var(--accent);animation:sp .7s linear infinite}
-.trace b{font-weight:500;color:var(--ink2)}.trace em{font:400 12px 'JetBrains Mono',monospace;font-style:normal;margin-left:auto;color:var(--mute)}
-@keyframes sp{to{transform:rotate(360deg)}}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:8px;margin:0 0 20px}
-.card{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;display:grid;gap:4px;min-width:0}
-.card:hover,.card.on{border-color:var(--accent)}
-.card .t{font-size:13px;font-weight:500;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.card .m{display:flex;align-items:center;gap:7px;font:400 11.5px 'JetBrains Mono',monospace;color:var(--mute);min-width:0}
-.card .m span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.n{flex:none;min-width:18px;height:18px;border-radius:5px;display:inline-grid;place-items:center;font:600 11px 'JetBrains Mono',monospace;background:var(--accent-soft);color:var(--accent)}
-.card.used .n{background:var(--accent);color:var(--accent-ink)}
-.ans{font-size:17px;line-height:1.7;color:var(--ink)}
-.ans p{margin:0}
-.ans.refused{border:1px solid var(--line2);border-left:3px solid var(--warn);border-radius:12px;padding:16px 18px;background:var(--panel)}
-.ans.refused .hd{font-weight:600;margin:0 0 4px}.ans .why{margin-top:8px;font-size:14px;color:var(--ink2)}
-.ans.err{color:var(--bad)}
-.cite{display:inline-grid;place-items:center;min-width:18px;height:18px;vertical-align:2px;font:600 11px 'JetBrains Mono',monospace;color:var(--accent);background:var(--accent-soft);border:0;border-radius:5px;padding:0 5px;margin:0 2px;cursor:pointer}
-.cite:hover{background:var(--accent);color:var(--accent-ink)}
-.acts{display:flex;gap:6px;margin-top:14px;align-items:center;font-size:12.5px;color:var(--mute)}
-.act{border:1px solid var(--line2);background:transparent;border-radius:8px;padding:4px 10px;cursor:pointer;color:var(--ink2);font-size:12.5px}.act:hover{border-color:var(--accent)}
-.skel{height:13px;border-radius:7px;background:linear-gradient(90deg,var(--line),var(--line2),var(--line));background-size:200% 100%;animation:sh 1.2s linear infinite;margin:10px 0}.skel.s{width:55%}
+.ask{display:flex;align-items:stretch;border:2px solid var(--rule);border-radius:4px;background:var(--sheet);transition:box-shadow .15s}
+.ask:focus-within{box-shadow:5px 5px 0 var(--marker)}
+.ask textarea{flex:1;min-width:0;border:0;outline:0;resize:none;background:transparent;font:500 18px/1.4 'Bricolage Grotesque';padding:15px 16px;max-height:150px}
+.ask textarea::placeholder{color:var(--mute);font-weight:400}
+.solid{border:0;border-radius:3px;background:var(--ink);color:var(--on-ink);font-weight:600;padding:0 20px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-height:38px}
+.solid:hover{background:var(--marker);color:#fff}.solid:disabled{opacity:.35;cursor:default}.solid:disabled:hover{background:var(--ink);color:var(--on-ink)}
+.ask .solid{border-radius:0;padding:0 22px}
+.plain{border:1.5px solid var(--rule);background:transparent;border-radius:3px;padding:0 16px;min-height:38px;cursor:pointer;font-weight:500}
+
+.idx{list-style:none;margin:26px 0 0;padding:0;counter-reset:q}
+.idx button{display:flex;gap:14px;align-items:baseline;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:transparent;padding:13px 2px;cursor:pointer;font-size:16.5px;color:var(--ink2)}
+.idx li:last-child button{border-bottom:1px solid var(--line)}
+.idx button::before{counter-increment:q;content:counter(q,decimal-leading-zero);font:400 11.5px 'DM Mono',monospace;color:var(--mute)}
+.idx button:hover{color:var(--ink)}.idx button:hover span{background:linear-gradient(transparent 62%,var(--fill) 62%)}
+
+.turn{margin-top:30px}
+.qline{font:500 14px 'DM Mono',monospace;color:var(--mute);margin:0 0 12px}
+.qline b{color:var(--ink);font-weight:500}
+.ans{font:600 clamp(26px,3.2vw,38px)/1.16 'Bricolage Grotesque';font-variation-settings:'opsz' 60,'wdth' 90;letter-spacing:-.025em;text-wrap:pretty}
+.ans mark{background:linear-gradient(104deg,var(--fill),var(--fill));color:inherit}
+.ans .cite{font:500 12px 'DM Mono',monospace;letter-spacing:0;vertical-align:.8em;background:var(--ink);color:var(--on-ink);border:0;border-radius:3px;padding:1px 6px;margin-left:5px;cursor:pointer}
+.ans .cite:hover{background:var(--marker);color:#fff}
+.ans .skel{height:.9em;background:linear-gradient(90deg,var(--line),var(--fill-soft),var(--line));background-size:200% 100%;animation:sh 1.1s linear infinite;border-radius:3px;margin:.35em 0}.ans .skel.s{width:55%}
 @keyframes sh{to{background-position:-200% 0}}
-@media (prefers-reduced-motion:reduce){.skel,.trace .run .tick{animation:none}main{scroll-behavior:auto}}
-.pass{display:grid;gap:8px;margin-top:22px}
-.pass h3{margin:0 0 2px;font:500 12px Inter,sans-serif;color:var(--mute)}
-.p{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
-.p.on{border-color:var(--accent)}
-.p header{display:flex;gap:10px;align-items:center;padding:9px 12px;font:400 12px 'JetBrains Mono',monospace;color:var(--mute)}
-.p header .w{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
-.p pre{margin:0;padding:0 12px 12px;white-space:pre-wrap;word-break:break-word;font:400 13px/1.65 'JetBrains Mono',monospace;color:var(--ink2);max-height:6.9em;overflow:hidden}
-.p.open pre{max-height:none}
-.p .more{border:0;border-top:1px solid var(--line);width:100%;background:transparent;padding:6px;font-size:12.5px;color:var(--accent);cursor:pointer}
-mark{background:var(--hl);color:var(--ink);border-radius:3px;padding:0 2px}
+.ans.refused .big{display:block;font-weight:800;font-variation-settings:'opsz' 96,'wdth' 88;font-size:clamp(40px,6vw,64px);line-height:1;margin:0 0 12px;letter-spacing:-.03em;text-decoration:line-through;text-decoration-color:var(--marker);text-decoration-thickness:.09em}
+.ans.refused .sm{display:block;font:400 16px/1.55 'Bricolage Grotesque';font-variation-settings:'opsz' 14,'wdth' 100;letter-spacing:0;color:var(--ink2);max-width:52ch;margin-top:8px}
+.ans.err{color:var(--bad);font-size:20px}
+.how{margin:14px 0 0;font:400 12.5px 'DM Mono',monospace;color:var(--mute);display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.how button{border:0;background:none;padding:0;cursor:pointer;color:var(--ink);text-decoration:underline;text-underline-offset:3px;font:inherit}
+.how button:hover{text-decoration-color:var(--marker)}
+.ev{margin-top:34px}.ev h3,.earlier h3{margin:0 0 6px;font:500 12px 'DM Mono',monospace;color:var(--mute)}
+.ev ol,.earlier ol{list-style:none;margin:0;padding:0}
+.row{display:grid;grid-template-columns:26px minmax(0,1fr) 84px;gap:12px;align-items:center;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:transparent;padding:11px 0 11px 10px;cursor:pointer;position:relative}
+.ev li:last-child .row{border-bottom:1px solid var(--line)}
+.row .no{font:500 12px 'DM Mono',monospace;color:var(--mute)}
+.row .t{font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .f{display:block;font:400 11.5px 'DM Mono',monospace;color:var(--mute);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .bar2{height:6px;background:var(--line);border-radius:2px;overflow:hidden}.row .bar2 i{display:block;height:100%;background:var(--ink)}
+.row.sel{background:var(--fill-soft)}.row.sel::before{content:"";position:absolute;left:0;top:-1px;bottom:0;width:4px;background:var(--marker)}
+.row.cited .bar2 i{background:var(--marker)}
+.row .tag{font:500 10px 'DM Mono',monospace;background:var(--marker);color:#fff;border-radius:2px;padding:1px 5px;margin-left:8px;vertical-align:2px}
+.earlier{margin-top:44px}.earlier button{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:transparent;padding:9px 0;cursor:pointer;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.earlier button:hover{color:var(--ink)}
+.foot{border-top:1px solid var(--line);padding:18px 28px 22px;font-size:12.5px;color:var(--mute);display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between}
+.foot p{margin:0;max-width:58ch}.foot a{color:inherit}
 
-.statusbar{display:flex;gap:14px;height:28px;align-items:center;padding:0 16px;border-top:1px solid var(--line);font:400 11.5px 'JetBrains Mono',monospace;color:var(--mute);flex:none;overflow:hidden;white-space:nowrap}
-.statusbar .sp{flex:1}
+/* reader */
+.reader{background:var(--reader);border-left:2px solid var(--rule);display:flex;flex-direction:column;min-width:0;min-height:0}
+.rh{display:flex;align-items:center;gap:12px;padding:12px 16px;flex:none}
+#pg{flex:1;min-width:0;border:1.5px solid var(--rule);border-radius:4px;background:var(--sheet);padding:6px 10px;font:400 12.5px 'DM Mono',monospace;cursor:pointer;text-overflow:ellipsis}
+.step{display:flex;align-items:center;gap:8px;font:400 12px 'DM Mono',monospace;color:var(--ink2);white-space:nowrap}
+.step button{width:28px;height:28px;border:1.5px solid var(--rule);background:var(--sheet);border-radius:4px;cursor:pointer;font-size:16px;line-height:1}.step button:hover{background:var(--marker);color:#fff}
+.rb{flex:1;min-height:0;overflow:auto;margin:0 16px;background:var(--sheet);border:1px solid var(--line);border-radius:3px;padding:14px 0;font:400 13px/1.75 'DM Mono',monospace;scroll-behavior:smooth}
+.ln{display:grid;grid-template-columns:48px minmax(0,1fr);gap:0}
+.ln .n{text-align:right;padding-right:14px;color:var(--mute);font-size:11px;user-select:none;opacity:.7}
+.ln .c{white-space:pre-wrap;word-break:break-word;padding-right:18px;color:var(--ink2);min-height:1.75em}
+.ln.inp .n{color:var(--marker);opacity:1}.ln.inp .c{background:var(--fill-soft);color:var(--ink)}
+.ln.h .c{font-weight:500;color:var(--ink)}
+.rb mark{background:var(--fill);color:var(--ink);padding:.04em .1em;border-radius:2px;box-shadow:0 0 0 1px var(--fill)}
+.rb mark.flash{animation:fl 1.2s ease-out}@keyframes fl{0%{box-shadow:0 0 0 0 var(--marker)}40%{box-shadow:0 0 0 7px var(--fill)}100%{box-shadow:0 0 0 1px var(--fill)}}
+.empty-r{padding:30px 28px;color:var(--ink2);font-family:'Bricolage Grotesque',sans-serif;font-size:17px}
+.empty-r p{margin:0 0 10px;max-width:34ch}
+.legend{margin:0;padding:10px 18px 12px;font:400 11.5px 'DM Mono',monospace;color:var(--mute);display:flex;gap:6px;align-items:center}
+.legend i{width:16px;height:9px;border-radius:2px;display:inline-block;margin:0 2px 0 10px}.legend i:first-child{margin-left:0}
+.k-m{background:var(--fill);box-shadow:0 0 0 1px var(--fill)}.k-p{background:var(--fill-soft);border:1px solid var(--fill)}
 
-.mine{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
-.drop{display:grid;gap:4px;justify-items:center;text-align:center;border:1.5px dashed var(--line2);border-radius:12px;padding:24px 16px;cursor:pointer;color:var(--mute);font-size:13.5px}
-.drop svg{width:20px;height:20px;color:var(--accent)}
-.drop strong{color:var(--ink);font-weight:500;font-size:15px}.drop:hover,.drop.over,.drop:focus-visible{border-color:var(--accent);outline:0}.drop.over{background:var(--accent-soft)}
-.paste{margin:12px 0 0;font-size:13.5px}.paste summary{cursor:pointer;color:var(--ink2)}
-.paste textarea{width:100%;margin-top:8px;background:var(--bg);color:var(--ink);border:1px solid var(--line2);border-radius:10px;padding:10px;font:13px/1.5 'JetBrains Mono',monospace}
+/* your documents */
+.mine{margin:0 0 20px;padding:18px;border:2px solid var(--rule);border-radius:4px;background:var(--sheet)}
+.drop{display:grid;gap:4px;justify-items:center;text-align:center;border:1.5px dashed var(--mute);border-radius:3px;padding:26px 16px;cursor:pointer;color:var(--ink2);font-size:14px}
+.drop strong{color:var(--ink);font-size:17px;font-weight:600}.drop:hover,.drop.over,.drop:focus-visible{border-color:var(--marker);background:var(--fill-soft);outline:0}
+.paste{margin:12px 0 0;font-size:14px}.paste summary{cursor:pointer;color:var(--ink2)}
+.paste textarea{width:100%;margin-top:8px;background:var(--bg);border:1.5px solid var(--rule);border-radius:3px;padding:10px;font:13px/1.5 'DM Mono',monospace}
 .filelist{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
-.filelist li{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:5px 12px;font-size:13.5px}
+.filelist li{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid var(--line);border-radius:3px;padding:5px 12px;font:400 13px 'DM Mono',monospace}
 .filelist button{border:0;background:transparent;color:var(--mute);cursor:pointer;font-size:18px;line-height:1;padding:4px 8px}
 .privacy{font-size:12.5px;color:var(--mute);margin:12px 0 0}.err{color:var(--bad);font-size:13.5px;min-height:18px;margin:8px 0 0}
-.indexed{margin:12px 0 0;color:var(--ok);font-size:13.5px}
+.indexed{margin:12px 0 0;color:var(--ok);font-size:14px;font-weight:500}
 .mineActions{display:flex;gap:8px;margin-top:6px}
-.primary{border:0;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:8px 16px;cursor:pointer}.primary:disabled{opacity:.4;cursor:default}
-.ghost{border:1px solid var(--line2);background:transparent;border-radius:9px;padding:8px 14px;cursor:pointer;color:var(--ink2)}
 
-dialog{border:1px solid var(--line2);background:var(--panel);color:var(--ink);border-radius:16px;padding:24px;max-width:480px;width:calc(100% - 32px)}
-dialog::backdrop{background:rgba(0,0,0,.5)}
-dialog h2{margin:0 0 12px;font-size:20px;letter-spacing:-.02em}
-dialog ol{margin:0 0 12px;padding:0;list-style:none;display:grid;gap:10px}
-dialog li b{display:block;font-weight:600}dialog li span,dialog p{color:var(--ink2);font-size:14px}
-code{font:500 .9em 'JetBrains Mono',monospace}
+dialog{border:2px solid var(--rule);background:var(--bg);color:var(--ink);border-radius:4px;padding:26px;max-width:480px;width:calc(100% - 32px);box-shadow:8px 8px 0 var(--marker)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h2{margin:0 0 14px;font:800 26px 'Bricolage Grotesque';letter-spacing:-.03em}
+dialog ol{margin:0 0 14px;padding:0;list-style:none;display:grid;gap:12px}
+dialog li b{display:block;font-weight:700}dialog li span,dialog p{color:var(--ink2);font-size:14.5px}
+code{font:500 .9em 'DM Mono',monospace}
 
-@media (max-width:860px){
- .app{grid-template-columns:minmax(0,1fr)}
- .rail{position:fixed;inset:0 auto 0 0;width:280px;z-index:20;transform:translateX(-100%);transition:transform .2s}
- .app.nav .rail{transform:none}
- .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10}
- .menu{display:grid}
- main{padding:0 16px}
- .chip{display:none}
+@media (max-width:1000px){
+ html,body{height:auto}.app{height:auto;min-height:100%}
+ .deck{display:block}.desk{overflow:visible}
+ .reader{border-left:0;border-top:2px solid var(--rule);height:80vh;min-height:420px}
+ .desk-in{padding:28px 18px}.foot{padding:16px 18px}
+ .bar{flex-wrap:wrap;height:auto;padding:10px 16px;gap:10px}.modeline{display:none}.seg{order:5;width:100%}.seg button{flex:1}
 }
-@media (prefers-reduced-motion:reduce){.rail{transition:none}}
-.trace em{white-space:nowrap;padding-left:8px}
-@media (max-width:860px){.statusbar span:first-child{display:none}.statusbar .sp{display:none}.statusbar{justify-content:flex-end}}
 </style>
 <style>
 html[data-view=land] .app,html[data-view=land] dialog{display:none}
 html[data-view=app] #land{display:none}
 html[data-view=land],html[data-view=land] body{height:auto}
-#land{--w:1120px;color:var(--ink);background:var(--bg);overflow-x:clip}
-#land *{box-sizing:border-box}
-#land a{color:inherit}
-.lp-wrap{max-width:var(--w);margin:0 auto;padding:0 24px}
-.lp-nav{position:sticky;top:0;z-index:5;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--bg) 82%,transparent);border-bottom:1px solid var(--line)}
-.lp-nav .lp-wrap{display:flex;align-items:center;gap:22px;height:60px}
-.lp-brand{display:flex;align-items:center;gap:10px;font:600 16px Inter,sans-serif;text-decoration:none;letter-spacing:-.01em}
-.lp-links{display:flex;gap:22px;margin-left:24px;font-size:14px;color:var(--ink2)}
-.lp-links a{text-decoration:none}.lp-links a:hover{color:var(--ink)}
+#land{color:var(--ink);background:var(--bg);overflow-x:clip}
+#land *{box-sizing:border-box}#land a{color:inherit}
+.lp-wrap{max-width:1200px;margin:0 auto;padding:0 28px}
+.lp-nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:2px solid var(--rule)}
+.lp-nav .lp-wrap{display:flex;align-items:center;gap:26px;height:56px}
+.lp-links{display:flex;gap:22px;margin-left:12px;font-size:14.5px;font-weight:500}
+.lp-links a{text-decoration:none}.lp-links a:hover{text-decoration:underline;text-decoration-color:var(--marker);text-underline-offset:5px;text-decoration-thickness:2px}
 .lp-sp{flex:1}
-.lp-btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);font:600 14px Inter,sans-serif;padding:10px 18px;cursor:pointer;text-decoration:none}
-.lp-btn.lg{padding:14px 24px;font-size:15px;border-radius:12px}
-.lp-btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
-.lp-btn:hover{filter:brightness(1.08)}.lp-btn.ghost:hover{border-color:var(--accent);filter:none}
-.lp-hero{position:relative;padding:84px 0 70px}
-.lp-hero::before{content:"";position:absolute;inset:-120px 0 auto 0;height:640px;background:radial-gradient(60% 60% at 70% 20%,var(--accent-soft),transparent 70%);pointer-events:none}
-.lp-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:center;position:relative}
-.lp-hero h1{font:600 clamp(40px,6.2vw,76px)/1.02 Inter,sans-serif;letter-spacing:-.045em;margin:0 0 22px;text-wrap:balance}
-.lp-hero p.sub{font-size:19px;line-height:1.55;color:var(--ink2);max-width:48ch;margin:0 0 30px}
+.lp-btn{display:inline-flex;align-items:center;gap:10px;border:2px solid var(--rule);border-radius:4px;background:var(--ink);color:var(--on-ink);font:600 15px 'Bricolage Grotesque';padding:11px 20px;cursor:pointer;text-decoration:none;transition:box-shadow .15s,transform .15s}
+.lp-btn:hover{box-shadow:5px 5px 0 var(--marker);transform:translate(-2px,-2px)}
+.lp-btn.lg{padding:15px 26px;font-size:17px}
+.lp-btn.out{background:transparent;color:var(--ink)}
+.lp-btn.sm{padding:7px 14px;font-size:14px}
+.lp-hero{padding:72px 0 28px}
+.lp-hero h1{font:800 clamp(52px,9.4vw,132px)/.92 'Bricolage Grotesque';font-variation-settings:'opsz' 96,'wdth' 86;letter-spacing:-.035em;margin:0 0 34px;max-width:11.5em;text-wrap:balance}
+.lp-hero .hl{animation-delay:.5s}
+.lp-intro{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:end;margin-bottom:56px}
+.lp-intro p{margin:0;font-size:21px;line-height:1.45;max-width:36em;color:var(--ink2)}
 .lp-cta{display:flex;gap:12px;flex-wrap:wrap}
-.lp-note{margin:18px 0 0;font-size:13px;color:var(--mute)}
-/* demo panel */
-.lp-demo{background:var(--panel);border:1px solid var(--line2);border-radius:18px;box-shadow:0 30px 80px -30px rgba(70,80,240,.35);overflow:hidden;min-width:0}
-.lp-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);font:400 12px 'JetBrains Mono',monospace;color:var(--mute)}
-.lp-bar i{width:8px;height:8px;border-radius:50%;background:var(--line2)}.lp-bar span{margin-left:8px}
-.lp-body{padding:22px 22px 20px;min-height:372px}
-.lp-q{font:600 20px/1.3 Inter,sans-serif;letter-spacing:-.02em;margin:0 0 16px;min-height:52px}
-.lp-q::after{content:"";display:inline-block;width:2px;height:1em;background:var(--accent);margin-left:2px;vertical-align:-2px;animation:lpb 1s steps(2) infinite}
-.lp-q.done::after{display:none}
+.lp-intro .lp-fine{margin:16px 0 0;font:400 12.5px 'DM Mono',monospace;color:var(--mute);max-width:none}
+/* specimen */
+.spec{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);border:2px solid var(--rule);border-radius:4px;background:var(--sheet);min-height:420px}
+.sp-l{padding:28px 30px;display:flex;flex-direction:column;border-right:2px solid var(--rule);min-width:0}
+.sp-q{font:500 14px 'DM Mono',monospace;color:var(--mute);margin:0 0 14px;min-height:42px}.sp-q b{color:var(--ink);font-weight:500}
+.sp-q .cur{display:inline-block;width:8px;height:1em;background:var(--marker);vertical-align:-2px;margin-left:2px;animation:lpb 1s steps(2) infinite}
 @keyframes lpb{50%{opacity:0}}
-.lp-tr{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:6px;font-size:13px;color:var(--mute);min-height:44px}
-.lp-tr li{display:flex;align-items:center;gap:9px;opacity:0;transform:translateY(4px);transition:.3s}.lp-tr li.on{opacity:1;transform:none}
-.lp-tr .t{width:14px;height:14px;border-radius:50%;background:var(--ok);display:grid;place-items:center}.lp-tr .t::after{content:"";width:4px;height:7px;border:solid var(--accent-ink);border-width:0 1.6px 1.6px 0;transform:rotate(45deg) translate(-1px,-1px)}
-.lp-tr em{margin-left:auto;font:400 12px 'JetBrains Mono',monospace;font-style:normal}
-.lp-a{font-size:17px;line-height:1.6;margin:0 0 16px;min-height:30px;opacity:0;transition:opacity .4s}.lp-a.on{opacity:1}
-.lp-a.ref{border-left:3px solid var(--warn);padding-left:14px;color:var(--ink)}
-.lp-a .c{display:inline-grid;place-items:center;min-width:18px;height:18px;vertical-align:2px;font:600 11px 'JetBrains Mono',monospace;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:0 5px;margin-left:4px}
-.lp-p{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:12px 14px;font:400 12.5px/1.65 'JetBrains Mono',monospace;color:var(--ink2);opacity:0;transform:translateY(6px);transition:.4s}.lp-p.on{opacity:1;transform:none}
-.lp-p b{display:block;font-weight:500;color:var(--mute);margin-bottom:4px}
-.lp-p mark{background:var(--hl);color:var(--ink);padding:0 2px;border-radius:3px}
+.sp-a{font:600 clamp(26px,3vw,38px)/1.14 'Bricolage Grotesque';font-variation-settings:'opsz' 60,'wdth' 90;letter-spacing:-.025em;min-height:90px;opacity:0;transition:opacity .35s}
+.sp-a.on{opacity:1}
+.sp-a mark{background:linear-gradient(104deg,var(--fill),var(--fill)) no-repeat;background-size:0 100%;transition:background-size .8s cubic-bezier(.6,.05,.2,1);color:inherit}.sp-a.on mark{background-size:100% 100%}
+.sp-a .cite{font:500 12px 'DM Mono',monospace;letter-spacing:0;vertical-align:.8em;background:var(--ink);color:var(--on-ink);border-radius:3px;padding:1px 6px;margin-left:5px}
+.sp-a.ref .big{display:block;font-weight:800;font-size:clamp(40px,5vw,60px);line-height:1;text-decoration:line-through;text-decoration-color:var(--marker);text-decoration-thickness:.09em}
+.sp-a.ref .sm{display:block;font:400 16px/1.5 'Bricolage Grotesque';letter-spacing:0;color:var(--ink2);margin-top:12px}
+.sp-m{margin:auto 0 0;padding-top:20px;font:400 12px 'DM Mono',monospace;color:var(--mute);opacity:0;transition:opacity .4s}.sp-m.on{opacity:1}
+.sp-r{background:var(--reader);padding:14px;display:flex;flex-direction:column;min-width:0}
+.sp-h{display:flex;justify-content:space-between;gap:10px;font:400 12px 'DM Mono',monospace;color:var(--ink2);padding:2px 4px 10px}
+.sp-sheet{flex:1;background:var(--sheet);border:1px solid var(--line);border-radius:3px;padding:12px 0;font:400 13px/1.75 'DM Mono',monospace;overflow:hidden;opacity:.35;transition:opacity .4s}.sp-sheet.on{opacity:1}
+.sp-sheet .ln{display:grid;grid-template-columns:46px minmax(0,1fr)}.sp-sheet .n{text-align:right;padding-right:14px;color:var(--mute);font-size:11px;opacity:.7}
+.sp-sheet .c{white-space:pre-wrap;word-break:break-word;padding-right:16px;color:var(--ink2);min-height:1.75em}
+.sp-sheet .ln.inp .c{background:var(--fill-soft);color:var(--ink)}.sp-sheet .ln.inp .n{color:var(--marker);opacity:1}
+.sp-sheet mark{background:linear-gradient(104deg,var(--fill),var(--fill)) no-repeat;background-size:0 100%;color:var(--ink);border-radius:2px;padding:.04em .1em;transition:background-size .7s .3s cubic-bezier(.6,.05,.2,1)}.sp-sheet.hit mark{background-size:100% 100%}
 /* sections */
-.lp-sec{padding:96px 0;border-top:1px solid var(--line)}
-.lp-sec h2{font:600 clamp(28px,4vw,46px)/1.08 Inter,sans-serif;letter-spacing:-.035em;margin:0 0 14px;text-wrap:balance;max-width:20ch}
-.lp-sec .lede{font-size:18px;color:var(--ink2);max-width:56ch;margin:0 0 44px}
-.lp-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden}
-.lp-step{padding:26px;border-right:1px solid var(--line);background:var(--panel)}.lp-step:last-child{border:0}
-.lp-step .k{font:500 12px 'JetBrains Mono',monospace;color:var(--accent);margin-bottom:14px}
-.lp-step h3{margin:0 0 8px;font:600 20px Inter,sans-serif;letter-spacing:-.02em}
-.lp-step p{margin:0;color:var(--ink2);font-size:15px}
-.lp-step .big{font:600 34px/1 Inter,sans-serif;letter-spacing:-.04em;margin:18px 0 4px}.lp-step .cap{font-size:12.5px;color:var(--mute)}
-.lp-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px}
-.lp-card{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:26px;min-width:0}
-.lp-card h3{margin:0 0 4px;font:600 18px Inter,sans-serif;letter-spacing:-.02em}.lp-card .s{font-size:13.5px;color:var(--mute);margin:0 0 20px}
-.lp-row{display:grid;grid-template-columns:150px minmax(0,1fr) 52px;gap:12px;align-items:center;font-size:13px;margin:9px 0;color:var(--ink2)}
-.lp-row .tr{height:8px;border-radius:5px;background:var(--line)}.lp-row .fl{height:100%;border-radius:5px;background:var(--line2)}.lp-row.hi .fl{background:var(--accent)}.lp-row.hi{color:var(--ink);font-weight:500}
-.lp-row b{font:500 12.5px 'JetBrains Mono',monospace;text-align:right;color:var(--ink)}
-.lp-stat{display:flex;align-items:baseline;gap:14px;padding:16px 0;border-top:1px solid var(--line)}.lp-stat:first-of-type{border-top:0;padding-top:0}
-.lp-stat b{font:600 38px/1 Inter,sans-serif;letter-spacing:-.04em;flex:0 0 150px}.lp-stat span{font-size:14px;color:var(--ink2)}
-.lp-stat.warn b{color:var(--warn)}.lp-stat.ok b{color:var(--ok)}
-.lp-lim{display:grid;gap:0;max-width:760px}
-.lp-lim li{list-style:none;padding:18px 0;border-top:1px solid var(--line);color:var(--ink2);font-size:16px}.lp-lim li b{color:var(--ink);font-weight:600}
-.lp-lim{margin:0;padding:0}
-.lp-final{text-align:left;padding:110px 0}
-.lp-final h2{max-width:14ch;font-size:clamp(34px,5.4vw,64px)}
-.lp-foot{border-top:1px solid var(--line);padding:36px 0 60px;font-size:13px;color:var(--mute)}
+.lp-sec{padding:104px 0 0}
+.lp-sec h2{font:800 clamp(34px,5.4vw,72px)/.98 'Bricolage Grotesque';font-variation-settings:'opsz' 80,'wdth' 88;letter-spacing:-.03em;margin:0 0 18px;text-wrap:balance;max-width:14em}
+.lp-sec .lede{font-size:19px;color:var(--ink2);max-width:40em;margin:0 0 44px}
+.lp-rule{border:0;border-top:2px solid var(--rule);margin:0}
+.lp-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid var(--rule)}
+.lp-3>div{padding:26px 26px 30px 0;border-right:1px solid var(--line);margin-right:26px}.lp-3>div:last-child{border:0;margin:0}
+.lp-3 h3{font:700 22px 'Bricolage Grotesque';letter-spacing:-.02em;margin:0 0 8px}
+.lp-3 p{margin:0;color:var(--ink2);font-size:16px}
+.lp-3 .big{font:800 clamp(44px,5vw,68px)/1 'Bricolage Grotesque';font-variation-settings:'opsz' 96,'wdth' 86;letter-spacing:-.035em;margin:26px 0 4px}
+.lp-3 .cap{font:400 12px 'DM Mono',monospace;color:var(--mute)}
+.lp-ev{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:0;border:2px solid var(--rule);border-radius:4px;background:var(--sheet)}
+.lp-ev>div{padding:28px 30px;min-width:0}.lp-ev>div:first-child{border-right:2px solid var(--rule)}
+.lp-ev h3{font:700 20px 'Bricolage Grotesque';margin:0 0 2px;letter-spacing:-.02em}.lp-ev .s{font:400 12px 'DM Mono',monospace;color:var(--mute);margin:0 0 20px}
+.lp-row{display:grid;grid-template-columns:150px minmax(0,1fr) 56px;gap:12px;align-items:center;font-size:14px;margin:20px 0;color:var(--ink2)}
+.lp-row .tr{height:12px;background:var(--line);border-radius:2px;overflow:hidden}.lp-row .fl{height:100%;background:var(--ink);transform-origin:left;transform:scaleX(0);transition:transform .9s cubic-bezier(.6,.05,.2,1)}
+.lp-row.hi{color:var(--ink);font-weight:600}.lp-row.hi .fl{background:var(--marker)}
+.lp-ev.in .fl{transform:scaleX(1)}
+.lp-row b{font:500 12.5px 'DM Mono',monospace;text-align:right;color:var(--ink)}
+.lp-st{padding:18px 0;border-top:1px solid var(--line)}.lp-st:first-of-type{border-top:0;padding-top:0}
+.lp-st b{display:inline-block;font:800 clamp(44px,5vw,64px)/1 'Bricolage Grotesque';font-variation-settings:'opsz' 96,'wdth' 86;letter-spacing:-.035em}
+.lp-st b.warn{background:linear-gradient(104deg,var(--fill),var(--fill));border-radius:.2em .5em .3em .45em;padding:0 .12em}
+.lp-st p{margin:6px 0 0;font-size:15px;color:var(--ink2);max-width:30em}
+.lp-err{margin:0;padding:0;list-style:none;max-width:820px;border-top:2px solid var(--rule)}
+.lp-err li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:8px;padding:18px 0;border-bottom:1px solid var(--line);font-size:17px;color:var(--ink2)}
+.lp-err li b{color:var(--ink);font-weight:700}.lp-err .d{font:500 14px 'DM Mono',monospace;color:var(--marker);padding-top:2px}
+.lp-final{padding:120px 0 110px}
+.lp-final h2{font-size:clamp(48px,8.4vw,120px);line-height:.92;max-width:9em}
+.lp-foot{border-top:2px solid var(--rule);padding:30px 0 56px;font-size:13px;color:var(--mute)}
 .lp-foot .lp-wrap{display:flex;gap:24px;flex-wrap:wrap;justify-content:space-between}.lp-foot p{margin:0;max-width:60ch}
 @media (max-width:900px){
- .lp-grid{grid-template-columns:minmax(0,1fr)}.lp-links{display:none}.lp-steps{grid-template-columns:1fr}.lp-step{border-right:0;border-bottom:1px solid var(--line)}
- .lp-two{grid-template-columns:minmax(0,1fr)}.lp-hero{padding-top:48px}.lp-sec{padding:64px 0}.lp-row{grid-template-columns:110px minmax(0,1fr) 48px}.lp-body{min-height:340px}
+ .lp-links{display:none}.lp-intro{grid-template-columns:1fr}.spec{grid-template-columns:1fr}.sp-l{border-right:0;border-bottom:2px solid var(--rule);min-height:300px}
+ .lp-3{grid-template-columns:1fr}.lp-3>div{border-right:0;margin:0;border-bottom:1px solid var(--line);padding-right:0}
+ .lp-ev{grid-template-columns:1fr}.lp-ev>div:first-child{border-right:0;border-bottom:2px solid var(--rule)}
+ .lp-row{grid-template-columns:112px minmax(0,1fr) 48px}.lp-sec{padding-top:72px}.lp-hero{padding-top:44px}.lp-wrap{padding:0 18px}.sp-sheet{min-height:280px}
 }
-@media (max-width:900px){.lp-stat{flex-direction:column;gap:8px}.lp-stat b{flex:none}}
-@media (prefers-reduced-motion:reduce){.lp-q::after{animation:none}.lp-tr li,.lp-p,.lp-a{transition:none}}
+@media (prefers-reduced-motion:reduce){.sp-q .cur{animation:none}.lp-row .fl{transition:none}}
 </style>
 <div id="land">
   <nav class="lp-nav" aria-label="Primary"><div class="lp-wrap">
-    <a class="lp-brand" href="#land"><span class="mark" aria-hidden="true"></span>DocuMind</a>
-    <div class="lp-links"><a href="#how">How it works</a><a href="#evidence">Evidence</a><a href="#limits">Limits</a></div>
+    <a class="word" href="#land">Docu<span class="mk">Mind</span></a>
+    <div class="lp-links"><a href="#how">How it works</a><a href="#evidence">Measurements</a><a href="#errata">Errata</a></div>
     <span class="lp-sp"></span>
     <button class="icon" id="lpTheme" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3 5.5 5.5 0 1 0 13 9.5z"/></svg></button>
-    <button class="lp-btn" data-open type="button">Open the app</button>
+    <button class="lp-btn sm" data-open type="button">Open the app</button>
   </div></nav>
 
-  <header class="lp-hero"><div class="lp-wrap lp-grid">
-    <div>
-      <h1>Answers that show their work.</h1>
-      <p class="sub">Ask the Express 5 documentation a question. DocuMind returns the passage the answer came from, and says "not covered" when the docs don't know.</p>
-      <div class="lp-cta"><button class="lp-btn lg" data-open type="button">Try it live</button><a class="lp-btn lg ghost" href="#evidence">See the measurements</a></div>
-      <p class="lp-note">Runs entirely in your browser. No account, no key, nothing leaves the page.</p>
+  <header class="lp-hero"><div class="lp-wrap">
+    <h1>Every answer, <span class="hl">marked at the source.</span></h1>
+    <div class="lp-intro">
+      <div><p>Ask the Express 5 documentation a question. DocuMind answers with the exact sentence, highlights it on the original page, and says "not in the docs" when it can't.</p><p class="lp-fine">Runs in your browser. No account, no key, nothing leaves the page.</p></div>
+      <div class="lp-cta"><button class="lp-btn lg" data-open type="button">Try it live</button><a class="lp-btn lg out" href="#evidence">See the measurements</a></div>
     </div>
-    <div class="lp-demo" aria-label="Live example: the real pipeline answering two questions">
-      <div class="lp-bar"><i></i><i></i><i></i><span>express-5-docs</span></div>
-      <div class="lp-body">
-        <p class="lp-q" id="dq"></p>
-        <ul class="lp-tr" id="dt"></ul>
-        <p class="lp-a" id="da"></p>
-        <div class="lp-p" id="dp"></div>
-      </div>
+    <div class="spec" aria-label="Live example: the real pipeline answering two questions">
+      <div class="sp-l"><p class="sp-q" id="dq"></p><div class="sp-a" id="da"></div><p class="sp-m" id="dm"></p></div>
+      <div class="sp-r"><div class="sp-h"><span id="dh">guide / routing</span><span id="dl"></span></div><div class="sp-sheet" id="ds"></div></div>
     </div>
   </div></header>
 
   <section class="lp-sec" id="how"><div class="lp-wrap">
-    <h2>Built to be checked, not trusted.</h2>
-    <p class="lede">Every stage is small enough to read and was kept or dropped based on a measurement.</p>
-    <div class="lp-steps">
-      <div class="lp-step"><div class="k">1 · Chunk</div><h3>Split at headings</h3><p>Each section keeps its page title and heading, so a bare paragraph still has context.</p><div class="big" id="nChunks">198</div><div class="cap">passages from <span id="nDocs">16</span> pages</div></div>
-      <div class="lp-step"><div class="k">2 · Retrieve</div><h3>Three signals, one ranking</h3><p>Keyword search and a local semantic index each vote, then a reranker orders the top five.</p><div class="big">71.4%</div><div class="cap">right passage ranked first</div></div>
-      <div class="lp-step"><div class="k">3 · Answer or refuse</div><h3>Only from those passages</h3><p>Unknown words or weak coverage mean a refusal, not a guess. Every answer links to its source.</p><div class="big">15 of 15</div><div class="cap">uncovered questions refused</div></div>
+    <h2>Small enough to read. Measured before it was trusted.</h2>
+    <p class="lede">Each stage was kept or dropped because a number said so.</p>
+    <div class="lp-3">
+      <div><h3>Chunk</h3><p>Pages are split at headings. Each passage keeps its page title and heading, so a bare paragraph still has context.</p><div class="big" id="nChunks">198</div><div class="cap">passages from <span id="nDocs">16</span> pages</div></div>
+      <div><h3>Retrieve</h3><p>Keyword search and a local semantic index each vote. A reranker orders the top five.</p><div class="big">71.4%</div><div class="cap">right passage ranked first</div></div>
+      <div><h3>Answer or refuse</h3><p>Only from those passages. Unknown words or weak coverage mean a refusal, not a guess.</p><div class="big">15 / 15</div><div class="cap">uncovered questions refused</div></div>
     </div>
   </div></section>
 
   <section class="lp-sec" id="evidence"><div class="lp-wrap">
-    <h2>The numbers, including the unflattering one.</h2>
-    <p class="lede">Measured on 50 questions written for this corpus: 35 the docs answer, 15 they don't.</p>
-    <div class="lp-two">
-      <div class="lp-card"><h3>Right passage ranked first</h3><p class="s">Retrieval recall@1, 35 answerable questions</p>
-        <div class="lp-row"><span>Semantic vectors</span><div class="tr"><div class="fl" style="width:40%"></div></div><b>40.0%</b></div>
-        <div class="lp-row"><span>LSA only</span><div class="tr"><div class="fl" style="width:54.3%"></div></div><b>54.3%</b></div>
-        <div class="lp-row"><span>Keyword + semantic</span><div class="tr"><div class="fl" style="width:57.1%"></div></div><b>57.1%</b></div>
-        <div class="lp-row"><span>Keyword (BM25)</span><div class="tr"><div class="fl" style="width:65.7%"></div></div><b>65.7%</b></div>
-        <div class="lp-row"><span>Keyword + reranker</span><div class="tr"><div class="fl" style="width:68.6%"></div></div><b>68.6%</b></div>
-        <div class="lp-row hi"><span>Hybrid + reranker</span><div class="tr"><div class="fl" style="width:71.4%"></div></div><b>71.4%</b></div>
+    <h2>The numbers, including the one I'd rather hide.</h2>
+    <p class="lede">Fifty questions written for this corpus: 35 the docs answer, 15 they don't.</p>
+    <div class="lp-ev" id="lpEv">
+      <div><h3>Right passage ranked first</h3><p class="s">retrieval recall@1 · 35 answerable questions</p>
+        <div class="lp-row"><span>Semantic vectors</span><div class="tr"><div class="fl" data-w="40"></div></div><b>40.0%</b></div>
+        <div class="lp-row"><span>LSA only</span><div class="tr"><div class="fl" data-w="54.3"></div></div><b>54.3%</b></div>
+        <div class="lp-row"><span>Keyword + semantic</span><div class="tr"><div class="fl" data-w="57.1"></div></div><b>57.1%</b></div>
+        <div class="lp-row"><span>Keyword (BM25)</span><div class="tr"><div class="fl" data-w="65.7"></div></div><b>65.7%</b></div>
+        <div class="lp-row"><span>Keyword + reranker</span><div class="tr"><div class="fl" data-w="68.6"></div></div><b>68.6%</b></div>
+        <div class="lp-row hi"><span>Hybrid + reranker</span><div class="tr"><div class="fl" data-w="71.4"></div></div><b>71.4%</b></div>
       </div>
-      <div class="lp-card"><h3>Answering, held-out half</h3><p class="s">Extractive mode, settings chosen on the other half</p>
-        <div class="lp-stat ok"><b>100%</b><span>of uncovered questions refused, 0 false answers</span></div>
-        <div class="lp-stat warn"><b>29%</b><span>of answerable questions answered correctly. Safe and conservative, not smart.</span></div>
-        <div class="lp-stat"><b>Pending</b><span>Model-written answers and prompt-injection results. They need an API key, and no number is claimed until they run.</span></div>
+      <div><h3>Answering, held-out half</h3><p class="s">extractive mode · settings chosen on the other half</p>
+        <div class="lp-st"><b>100%</b><p>of uncovered questions refused. Zero false answers.</p></div>
+        <div class="lp-st"><b class="warn">29%</b><p>of answerable questions answered correctly. Safe and conservative, not smart.</p></div>
+        <div class="lp-st"><b>Pending</b><p>Model-written answers and prompt-injection results need an API key. No number is claimed until they run.</p></div>
       </div>
     </div>
   </div></section>
 
-  <section class="lp-sec" id="limits"><div class="lp-wrap">
-    <h2>What this does not claim.</h2>
-    <p class="lede">Read these before you trust any of the numbers above.</p>
-    <ul class="lp-lim">
-      <li><b>Small benchmark.</b> The questions were written by the author for one corpus. With 35 answerable questions, one question is 2.9 percentage points.</li>
-      <li><b>Paraphrases stay hard.</b> Two questions are missed by every local method because they share almost no words with the answer. That is the case for a neural embedding model.</li>
-      <li><b>Thresholds are tuned on Express.</b> On your own documents the refusals may be stricter or looser than ideal. I haven't measured it.</li>
-      <li><b>This preview is extractive.</b> It copies the best sentence. It doesn't write answers, so it can't invent one.</li>
-    </ul>
+  <section class="lp-sec" id="errata"><div class="lp-wrap">
+    <h2>Errata: what this does not claim.</h2>
+    <p class="lede">Read these before trusting any number above.</p>
+    <ol class="lp-err">
+      <li><span class="d">1</span><span><b>Small benchmark.</b> The questions were written by the author for one corpus. With 35 answerable questions, one question is 2.9 percentage points.</span></li>
+      <li><span class="d">2</span><span><b>Paraphrases stay hard.</b> Two questions are missed by every local method because they share almost no words with the answer. That is the case for a neural embedding model.</span></li>
+      <li><span class="d">3</span><span><b>Thresholds are tuned on Express.</b> On your own documents the refusals may be stricter or looser than ideal. I haven't measured it.</span></li>
+      <li><span class="d">4</span><span><b>This preview is extractive.</b> It copies the best sentence. It doesn't write answers, so it can't invent one.</span></li>
+    </ol>
   </div></section>
 
-  <section class="lp-sec lp-final"><div class="lp-wrap">
-    <h2>Ask it something.</h2>
-    <p class="lede">Try a question the docs answer, then one they don't.</p>
+  <section class="lp-final"><div class="lp-wrap">
+    <h2>Ask it something it <span class="hl">can't</span> answer.</h2>
     <button class="lp-btn lg" data-open type="button">Open the app</button>
   </div></section>
 
@@ -311,127 +295,146 @@ html[data-view=land],html[data-view=land] body{height:auto}
 <script>
 (() => {
   const root = document.documentElement; const $ = id => document.getElementById(id);
-  const show = v => { root.dataset.view = v; window.scrollTo(0, 0); if (v === 'app') setTimeout(() => document.getElementById('q')?.focus(), 50); };
-  const route = () => show(location.hash === '#app' ? 'app' : 'land');
-  root.dataset.view = location.hash === '#app' ? 'app' : 'land';
+  const view = () => (location.hash === '#app' ? 'app' : 'land');
+  root.dataset.view = view();
+  const route = () => { root.dataset.view = view(); window.scrollTo(0, 0); if (view() === 'app') setTimeout(() => $('q')?.focus(), 50); };
   document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => { location.hash = 'app'; });
-  window.addEventListener('hashchange', () => { if (/^#(how|evidence|limits)$/.test(location.hash)) return; route(); });
-  $('lpTheme').onclick = () => document.getElementById('theme').click();
-  // in-app brand returns to landing
-  document.addEventListener('click', e => { if (e.target.closest('.rail .brand')) { e.preventDefault(); location.hash = 'land'; } }, true);
+  window.addEventListener('hashchange', () => { if (/^#(how|evidence|errata)$/.test(location.hash)) return; route(); });
+  $('lpTheme').onclick = () => $('theme').click();
+  document.addEventListener('click', e => { if (e.target.closest('.app .word')) { e.preventDefault(); location.hash = 'land'; } }, true);
+  new IntersectionObserver((es, o) => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); o.unobserve(e.target); } }), { threshold: .3 }).observe($('lpEv'));
+  document.querySelectorAll('.lp-row .fl').forEach(f => { f.style.width = f.dataset.w + '%'; });
 
-  // hero demo: runs the real pipeline, then replays the result
   const QS = ['How do I make part of a route path optional?', 'How do I protect against CSRF attacks?'];
-  const nice = s => s.file.replace(/__/g, ' / ').replace('.mdx', '');
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const nice = f => f.replace(/__/g, ' / ').replace('.mdx', '');
   const wait = ms => new Promise(r => setTimeout(r, ms));
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   async function run(q) {
     const t0 = performance.now(); const res = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: q }) });
-    const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '', sources = [], answer = null, tSrc = 0;
-    for (;;) { const { value, done } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i; while ((i = buf.indexOf('\n\n')) >= 0) { const l = buf.slice(0, i).trim(); buf = buf.slice(i + 2); if (!l.startsWith('data:')) continue; const ev = JSON.parse(l.slice(5)); if (ev.type === 'sources') { sources = ev.sources; tSrc = performance.now() - t0; } else if (ev.type === 'answer') answer = ev; } }
-    return { sources, answer, ms: Math.round(performance.now() - t0), tSrc: Math.round(tSrc) };
+    const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '', sources = [], answer = null;
+    for (;;) { const { value, done } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i; while ((i = buf.indexOf('\n\n')) >= 0) { const l = buf.slice(0, i).trim(); buf = buf.slice(i + 2); if (!l.startsWith('data:')) continue; const ev = JSON.parse(l.slice(5)); if (ev.type === 'sources') sources = ev.sources; else if (ev.type === 'answer') answer = ev; } }
+    const src = (answer && !answer.abstained && sources.find(s => s.id === answer.citations[0].id)) || sources[0];
+    const doc = await (await fetch('/api/doc?file=' + encodeURIComponent(src.file))).json();
+    return { src, answer, doc, ms: Math.round(performance.now() - t0) };
   }
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  async function play(q, r) {
-    const dq = $('dq'), dt = $('dt'), da = $('da'), dp = $('dp');
-    dq.className = 'lp-q'; dq.textContent = ''; dt.replaceChildren(); da.className = 'lp-a'; da.textContent = ''; dp.className = 'lp-p'; dp.textContent = '';
-    for (const ch of q) { dq.textContent += ch; if (!still) await wait(24); } dq.className = 'lp-q done'; await wait(still ? 0 : 300);
-    const step = (html, ms) => { const li = document.createElement('li'); li.innerHTML = `<span class="t"></span><span>${html}</span><em>${ms} ms</em>`; dt.append(li); requestAnimationFrame(() => li.classList.add('on')); };
-    step(`Retrieved <b>${r.sources.length}</b> passages, reranked`, r.tSrc); await wait(still ? 0 : 450);
-    const a = r.answer;
-    if (a.abstained) {
-      step('Coverage too weak, so no answer was written', r.ms); await wait(still ? 0 : 350);
-      da.className = 'lp-a ref on'; da.textContent = "Not covered by the Express 5 documentation. I won't guess.";
-      const s = r.sources[0]; dp.innerHTML = `<b>Closest passage, not an answer · ${esc(nice(s))}</b>${esc(s.text.slice(0, 190))}…`; dp.classList.add('on');
-    } else {
-      step('Copied the best matching sentence, with a citation', r.ms); await wait(still ? 0 : 350);
-      da.className = 'lp-a on'; da.innerHTML = `${esc(a.text)}<span class="c">1</span>`;
-      const s = r.sources.find(x => x.id === a.citations[0].id) || r.sources[0]; const best = a.text.split(/(?<=[.!?])\s+/)[0];
-      const k0 = s.text.indexOf(best); const cut = k0 >= 0 ? k0 + best.length + 90 : 220; const t = s.text.length > cut ? s.text.slice(0, cut).replace(/\s+\S*$/, '') + '…' : s.text; const i = t.indexOf(best);
-      dp.innerHTML = `<b>Source 1 · ${esc(nice(s))}${s.heading ? ' · ' + esc(s.heading) : ''}</b>` + (i >= 0 ? esc(t.slice(0, i)) + `<mark>${esc(best)}</mark>` + esc(t.slice(i + best.length)) : esc(t)); dp.classList.add('on');
+  function sheet(r) {
+    const text = r.doc.text, lines = text.split('\n'); const body = r.src.text.slice(r.src.text.indexOf('\n') + 1).trim();
+    const pi = text.indexOf(body); const pe = pi + body.length; const ans = r.answer.abstained ? null : r.answer.text.split(/(?<=[.!?])\s+/)[0]; const ai = ans ? text.indexOf(ans) : -1;
+    let off = 0, hit = 0; const offs = lines.map(l => { const s = off; off += l.length + 1; return s; });
+    if (ai >= 0) hit = offs.findIndex((s, i) => s + lines[i].length >= ai); else if (pi >= 0) hit = offs.findIndex((s, i) => s + lines[i].length >= pi);
+    const from = Math.max(0, hit - 3), to = Math.min(lines.length, from + 9); const box = $('ds'); box.replaceChildren();
+    for (let i = from; i < to; i++) {
+      const row = document.createElement('div'); row.className = 'ln'; const n = document.createElement('span'); n.className = 'n'; n.textContent = i + 1; const c = document.createElement('span'); c.className = 'c';
+      const s = offs[i], e = s + lines[i].length; if (pi >= 0 && s < pe && e > pi) row.classList.add('inp');
+      if (ai >= 0 && s <= ai && ai < e + 1) { const a = ai - s, b = Math.min(lines[i].length, a + ans.length); c.append(document.createTextNode(lines[i].slice(0, a))); const m = document.createElement('mark'); m.textContent = lines[i].slice(a, b); c.append(m, document.createTextNode(lines[i].slice(b))); }
+      else c.textContent = lines[i] || ' ';
+      row.append(n, c); box.append(row);
     }
+    return ai >= 0 ? hit + 1 : null;
+  }
+  async function play(q, r) {
+    const dq = $('dq'), da = $('da'), dm = $('dm'), ds = $('ds');
+    da.className = 'sp-a'; da.replaceChildren(); dm.className = 'sp-m'; ds.className = 'sp-sheet'; dq.replaceChildren(); $('dl').textContent = ''; $('dh').textContent = nice(r.src.file);
+    const b = document.createElement('b'), cur = document.createElement('span'); cur.className = 'cur'; dq.append('Q  ', b, cur);
+    for (const ch of q) { b.textContent += ch; if (!still) await wait(22); } cur.remove(); await wait(still ? 0 : 350);
+    const line = sheet(r);
+    if (r.answer.abstained) {
+      da.className = 'sp-a ref'; da.innerHTML = '<span class="big">Not in the docs.</span><span class="sm">Nothing here covers it, so nothing is marked. The closest passage is shown tinted.</span>';
+      requestAnimationFrame(() => { da.classList.add('on'); ds.classList.add('on'); }); dm.textContent = `Refused after ${r.ms} ms · reason: ${r.answer.reason.replace('_', ' ')}`;
+    } else {
+      const m = document.createElement('mark'); m.textContent = r.answer.text; const c = document.createElement('span'); c.className = 'cite'; c.textContent = '1'; da.append(m, c);
+      requestAnimationFrame(() => { da.classList.add('on'); }); await wait(still ? 0 : 700);
+      ds.classList.add('on'); await wait(60); ds.classList.add('hit'); $('dl').textContent = line ? 'line ' + line : '';
+      dm.textContent = `Copied from the source, nothing generated · ${r.ms} ms`;
+    }
+    dm.classList.add('on');
   }
   addEventListener('load', async () => {
     await wait(150);
     fetch('/api/health').then(r => r.json()).then(h => { $('nChunks').textContent = h.chunks; $('nDocs').textContent = h.docs; }).catch(() => {});
     let results; try { results = await Promise.all(QS.map(run)); } catch { return; }
-    for (let k = 0; ; k = (k + 1) % QS.length) { await play(QS[k], results[k]); if (still) break; await wait(4200); if (root.dataset.view !== 'land') { while (root.dataset.view !== 'land') await wait(800); } }
+    for (let k = 0; ; k = (k + 1) % QS.length) { await play(QS[k], results[k]); if (still) break; await wait(5200); while (root.dataset.view !== 'land') await wait(800); }
   });
 })();
 </script>
 
-<div class="app empty" id="app">
-  <aside class="rail" id="rail" aria-label="Sidebar">
-    <a class="brand" href="#" aria-label="DocuMind home"><span class="mark" aria-hidden="true"></span>DocuMind</a>
-    <button class="newq" id="newq" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>New question<kbd>/</kbd></button>
-
-    <p class="grp">Library</p>
-    <div class="lib" role="tablist" aria-label="What to ask about">
-      <button class="src-btn on" id="tab-express" role="tab" aria-selected="true" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h7l3 3v8H3zM10 2.5v3h3"/></svg><span>Express 5 docs</span><i id="expN"></i></button>
-      <button class="src-btn" id="tab-mine" role="tab" aria-selected="false" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11V3M4.5 6.5 8 3l3.5 3.5M3 13h10"/></svg><span>Your documents</span><i id="mineN">upload</i></button>
+<div class="app" id="app">
+  <header class="bar">
+    <a class="word" id="brand" href="#" aria-label="DocuMind home">Docu<span class="mk">Mind</span></a>
+    <div class="seg" role="tablist" aria-label="What to ask about">
+      <button class="on" id="tab-express" role="tab" aria-selected="true" type="button">Express 5 docs</button>
+      <button id="tab-mine" role="tab" aria-selected="false" type="button">Your documents</button>
     </div>
+    <span class="grow"></span>
+    <span class="modeline" id="modeline" title="How answers are produced">Checking…</span>
+    <button class="txtbtn" id="howbtn" type="button">How it works</button>
+    <button class="icon" id="theme" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3 5.5 5.5 0 1 0 13 9.5z"/></svg></button>
+  </header>
 
-    <p class="grp">This session</p>
-    <ol class="hist" id="hist" aria-label="Questions asked in this session"><li class="none">Nothing asked yet.</li></ol>
-
-    <div class="railfoot">
-      <button class="linkbtn" id="howbtn" type="button">How it works</button>
-      <p>Corpus: Express 5 docs, © The Express Contributors, <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a>. Not affiliated with Express.</p>
-    </div>
-  </aside>
-  <div class="scrim" id="scrim" hidden></div>
-
-  <div class="col">
-    <header class="topbar">
-      <button class="icon menu" id="menu" type="button" aria-label="Open sidebar"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></svg></button>
-      <nav class="crumb" aria-label="Breadcrumb"><span id="crumbSrc">Express 5 docs</span><span class="sep">/</span><b id="crumbPage">New question</b></nav>
-      <span class="chip" id="mode" title="How answers are produced"><i class="dot"></i><span id="modeTxt">Checking…</span></span>
-      <button class="icon" id="theme" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3 5.5 5.5 0 1 0 13 9.5z"/></svg></button>
-    </header>
-
-    <main id="main" tabindex="-1">
-      <div class="greet" id="greet">
-        <h1 id="h1">What do you want to find in the Express 5 docs?</h1>
-        <p>Answers come with the exact passage they were taken from. If the docs don't cover it, you get a refusal, not a guess.</p>
-      </div>
-
-      <section class="mine" id="panel-mine" hidden aria-label="Add your documents">
-        <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files or drop them here">
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11V3M4.5 6.5 8 3l3.5 3.5M3 13h10"/></svg>
-          <strong>Drop .md or .txt files</strong><span>or choose files · up to 8 files, 150 KB total</span>
-          <input id="files" type="file" accept=".md,.mdx,.txt,text/plain,text/markdown" multiple hidden>
+  <div class="deck" id="deck">
+    <section class="desk" id="desk" aria-label="Ask">
+      <div class="desk-in">
+        <div class="intro" id="intro">
+          <h1 id="h1">What do you want to <span class="hl">find</span>?</h1>
+          <p id="introp">Answers are marked at the source: the exact sentence, on the exact page. If the docs don't cover it, you get a refusal, not a guess.</p>
         </div>
-        <details class="paste"><summary>Or paste text</summary>
-          <label class="sr" for="pasted">Pasted document text</label>
-          <textarea id="pasted" rows="6" maxlength="150000" placeholder="# Title&#10;## A section&#10;Text you want to ask questions about"></textarea>
-        </details>
-        <ul id="filelist" class="filelist" aria-live="polite"></ul>
-        <p class="privacy">Indexed in this server's memory for one hour, behind a private link, never written to disk. Don't upload anything confidential to a public demo.</p>
-        <p id="mineErr" class="err" role="alert"></p>
-        <div class="mineActions"><button id="index" class="primary" type="button" disabled>Index documents</button><button id="forget" class="ghost" type="button" hidden>Remove my documents</button></div>
-      </section>
 
-      <div class="thread" id="thread" aria-live="polite"></div>
-      <p class="sr" id="live" aria-live="polite"></p>
-
-      <div class="dock" id="dock">
-        <form id="form" class="composer" autocomplete="off">
-          <label for="q" class="sr">Your question</label>
-          <textarea id="q" name="q" rows="1" maxlength="400" placeholder="Ask about routing, middleware, error handling…" required></textarea>
-          <div class="crow">
-            <span class="scope" id="scope">Searching Express 5 docs</span>
-            <button id="go" type="submit" aria-label="Ask"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg></button>
+        <section class="mine" id="panel-mine" hidden aria-label="Add your documents">
+          <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files or drop them here">
+            <strong>Drop .md or .txt files</strong><span>or choose files · up to 8 files, 150 KB total</span>
+            <input id="files" type="file" accept=".md,.mdx,.txt,text/plain,text/markdown" multiple hidden>
           </div>
-        </form>
-        <div class="chips" id="chips" aria-label="Example questions"></div>
-      </div>
-    </main>
+          <details class="paste"><summary>Or paste text</summary>
+            <label class="sr" for="pasted">Pasted document text</label>
+            <textarea id="pasted" rows="6" maxlength="150000" placeholder="# Title&#10;## A section&#10;Text you want to ask questions about"></textarea>
+          </details>
+          <ul id="filelist" class="filelist" aria-live="polite"></ul>
+          <p class="privacy">Indexed in this server's memory for one hour, behind a private link, never written to disk. Don't upload anything confidential to a public demo.</p>
+          <p id="mineErr" class="err" role="alert"></p>
+          <div class="mineActions"><button id="index" class="solid" type="button" disabled>Index documents</button><button id="forget" class="plain" type="button" hidden>Remove my documents</button></div>
+        </section>
 
-    <footer class="statusbar">
-      <span>Hybrid retrieval: BM25 + local semantic index + reranker</span>
-      <span class="sp"></span>
-      <span id="stat">Ready</span>
-    </footer>
+        <form id="form" class="ask" autocomplete="off">
+          <label for="q" class="sr">Your question</label>
+          <textarea id="q" name="q" rows="1" maxlength="400" placeholder="Ask about routing, middleware, error handling" required></textarea>
+          <button id="go" class="solid" type="submit">Ask<kbd>Enter</kbd></button>
+        </form>
+        <p class="sr" id="live" aria-live="polite"></p>
+
+        <ol class="idx" id="chips" aria-label="Example questions"></ol>
+
+        <article class="turn" id="turn" hidden>
+          <p class="qline" id="qline"></p>
+          <div class="ans" id="ans"></div>
+          <div class="ev" id="ev"></div>
+        </article>
+
+        <section class="earlier" id="earlier" hidden>
+          <h3>Earlier this session</h3>
+          <ol id="hist"></ol>
+        </section>
+      </div>
+      <footer class="foot">
+        <p>Corpus: Express 5 documentation, © The Express Contributors, <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a>. Not affiliated with or endorsed by Express.</p>
+        <p>Built by Karthik Uppari</p>
+      </footer>
+    </section>
+
+    <aside class="reader" id="reader" aria-label="Source reader">
+      <header class="rh">
+        <label class="sr" for="pg">Page</label>
+        <select id="pg"></select>
+        <div class="step" id="step" hidden>
+          <button type="button" id="prev" aria-label="Previous passage">&lsaquo;</button>
+          <span id="stepLbl">1 of 5</span>
+          <button type="button" id="next" aria-label="Next passage">&rsaquo;</button>
+        </div>
+      </header>
+      <div class="rb" id="rb" tabindex="0" aria-label="Page text">
+        <div class="empty-r" id="emptyR"><p>The page an answer came from opens here, with the answer marked.</p><p>Or pick any page above to read it.</p></div>
+      </div>
+      <p class="legend" id="legend" hidden><i class="k-m"></i>answer <i class="k-p"></i>retrieved passage</p>
+    </aside>
   </div>
 </div>
 
@@ -440,10 +443,10 @@ html[data-view=land],html[data-view=land] body{height:auto}
   <ol>
     <li><b>Chunk</b><span>Pages are split at headings, so an answer stays in one piece.</span></li>
     <li><b>Retrieve</b><span>Keyword search and a local semantic index each vote, then a reranker orders the top passages.</span></li>
-    <li><b>Answer or refuse</b><span>Only from those passages, with citations. Unknown words or weak matches mean a refusal.</span></li>
+    <li><b>Answer or refuse</b><span>Only from those passages, with the source marked. Unknown words or weak matches mean a refusal.</span></li>
   </ol>
   <p>Measured on a 50-question set written for this corpus. The tables and their limits are in the repository's <code>eval/results</code>.</p>
-  <button class="primary" id="howclose" type="button">Close</button>
+  <button class="solid" id="howclose" type="button">Close</button>
 </dialog>
 <script>
 (async () => {
@@ -851,6 +854,8 @@ function createPipeline({ corpusDir, docs: given, llm = null, topK = 5, maxChunk
     docCount: docs.length,
     chunkCount: chunks.length,
     docs: docs.map(d => d.file),
+    /** Full text of one indexed document, for the source reader. Null when the file is not in this pipeline. */
+    doc: file => { const d = docs.find(x => x.file === file); return d ? { file: d.file, text: d.text } : null; },
     retrieve: question => retriever.search(question, topK),
     /** Yields { type: 'sources' | 'delta' | 'answer', ... } events. */
     async *ask(question) {
@@ -886,7 +891,7 @@ return { createPipeline };
     const url = new URL(typeof input === 'string' ? input : input.url, location.href), method = (init.method || 'GET').toUpperCase(), p = url.pathname;
     if (!p.includes('/api/')) return realFetch(input, init);
     const path = p.slice(p.indexOf('/api/')), body = init.body ? JSON.parse(init.body) : {};
-    if (method === 'GET' && path === '/api/health') return json(200, { status: 'ok', mode: pipeline.mode, docs: pipeline.docCount, chunks: pipeline.chunkCount });
+    if (method === 'GET' && path === '/api/health') return json(200, { status: 'ok', mode: pipeline.mode, docs: pipeline.docCount, chunks: pipeline.chunkCount, files: pipeline.docs });
     if (method === 'POST' && path === '/api/collections') {
       const files = Array.isArray(body.files) ? body.files : [];
       if (!files.length || files.length > UPLOAD.maxFiles) return json(400, { error: 'invalid_files', message: 'Add between 1 and ' + UPLOAD.maxFiles + ' documents.' });
@@ -901,6 +906,11 @@ return { createPipeline };
       let pp; try { pp = createPipeline({ docs, maxChunks: UPLOAD.maxChunks }); } catch (e) { if (e.code === 'empty' || e.code === 'too_many_chunks') return json(422, { error: e.code, message: e.message }); throw e; }
       const id = rid(); collections.set(id, pp);
       return json(201, { id, docs: pp.docs, chunks: pp.chunkCount, expiresInMinutes: 60 });
+    }
+    if (method === 'GET' && path === '/api/doc') {
+      const cid = url.searchParams.get('collection'); const target = cid === null ? pipeline : collections.get(cid);
+      const d = target && target.doc(url.searchParams.get('file') || '');
+      return d ? json(200, d) : json(404, { error: 'doc_not_found' });
     }
     const del = path.match(/^\/api\/collections\/([0-9a-f]{32})$/);
     if (del && method === 'DELETE') { collections.delete(del[1]); return json(200, { ok: true }); }
@@ -926,30 +936,187 @@ const EXAMPLES = [
   'How do I store user sessions in Redis?',
   'How do I protect against CSRF attacks?',
 ];
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const ARROW = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>';
+const REASONS = {
+  unknown_terms: 'The question uses terms that never appear in these docs.',
+  low_coverage: 'No passage covers enough of what you asked to answer safely. These thresholds were tuned on the Express docs, so on your own documents they may be stricter or looser than ideal.',
+  model_abstained: 'The model found nothing in the retrieved passages that answers this.',
+  no_valid_citation: 'The model replied without citing a retrieved passage, so the reply was discarded.',
+};
+const app = $('app'); const emptyR = $('emptyR');
+const nice = f => f.replace(/__/g, ' / ').replace(/\.(mdx|md|txt)$/, '');
+const sentences = t => t.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
 
-let collection = null; let mineTab = false;
-const NAME = () => (collection ? 'your documents' : 'the Express 5 documentation');
-const app = $('app');
+let collection = null, mineTab = false, collFiles = [], corpusFiles = [];
+const docCache = new Map();
+const turns = []; let cur = -1; let selSrc = -1;
 
+/* ---------- source switch ---------- */
 const setScope = () => {
-  const name = collection ? 'your documents' : 'Express 5 docs';
-  $('scope').textContent = 'Searching ' + name;
-  $('crumbSrc').textContent = collection || mineTab ? 'Your documents' : 'Express 5 docs';
-  $('h1').textContent = mineTab ? 'What do you want to find in your documents?' : 'What do you want to find in the Express 5 docs?';
-  $('q').placeholder = mineTab ? (collection ? 'Ask about your documents' : 'Add documents above first') : 'Ask about routing, middleware, error handling…';
-  $('chips').hidden = mineTab;
+  $('h1').innerHTML = mineTab ? 'What do you want to <span class="hl">find</span> in your files?' : 'What do you want to <span class="hl">find</span>?';
+  $('q').placeholder = mineTab ? (collection ? 'Ask about your documents' : 'Add documents above first') : 'Ask about routing, middleware, error handling';
+  $('chips').hidden = mineTab || app.classList.contains('asked');
+  $('panel-mine').hidden = !mineTab;
 };
 const setTab = mine => {
-  mineTab = mine; if (!mine) collection = null;
+  mineTab = mine; if (!mine) { collection = null; collFiles = []; }
   $('tab-express').classList.toggle('on', !mine); $('tab-mine').classList.toggle('on', mine);
   $('tab-express').setAttribute('aria-selected', String(!mine)); $('tab-mine').setAttribute('aria-selected', String(mine));
-  $('panel-mine').hidden = !mine; setScope(); app.classList.add('empty'); closeNav();
-  $('crumbPage').textContent = 'New question';
+  app.classList.remove('asked'); $('turn').hidden = true; setScope(); fillPages(); clearReader();
 };
 $('tab-express').onclick = () => setTab(false); $('tab-mine').onclick = () => setTab(true);
-$('newq').onclick = () => { setTab(mineTab && collection ? true : mineTab); $('q').focus(); };
+$('brand').addEventListener('click', e => { e.preventDefault(); setTab(false); $('q').focus(); });
+
+/* ---------- reader ---------- */
+const fillPages = () => {
+  const files = mineTab ? collFiles : corpusFiles;
+  const sel = $('pg'); sel.replaceChildren();
+  const first = document.createElement('option'); first.value = ''; first.textContent = files.length ? `Browse ${files.length} pages` : (mineTab ? 'No documents yet' : 'Loading…'); sel.append(first);
+  for (const f of files) { const o = document.createElement('option'); o.value = f; o.textContent = nice(f); sel.append(o); }
+};
+$('pg').onchange = () => { const f = $('pg').value; if (f) openDoc(f, null); };
+const getDoc = async file => {
+  const key = (collection || 'c') + '|' + file; if (docCache.has(key)) return docCache.get(key);
+  const res = await fetch(`/api/doc?file=${encodeURIComponent(file)}${collection ? '&collection=' + collection : ''}`);
+  if (!res.ok) throw new Error('page');
+  const d = await res.json(); docCache.set(key, d); return d;
+};
+const clearReader = () => { $('rb').replaceChildren(emptyR); emptyR.hidden = false; $('legend').hidden = true; $('step').hidden = true; $('pg').value = ''; };
+/* ranges: {passage:[s,e]|null, marks:[[s,e],...]} in characters of the raw page text */
+function paint(doc, hit) {
+  const rb = $('rb'); rb.replaceChildren();
+  const text = doc.text; const lines = text.split('\n'); let off = 0;
+  const P = hit && hit.passage, M = (hit && hit.marks) || [];
+  const frag = document.createDocumentFragment(); let firstMark = null, firstPass = null;
+  lines.forEach((ln, i) => {
+    const s = off, e = off + ln.length; off = e + 1;
+    const row = document.createElement('div'); row.className = 'ln';
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = i + 1;
+    const c = document.createElement('span'); c.className = 'c';
+    const inP = P && s < P[1] && e >= P[0] && !(e === P[0]); if (inP) { row.classList.add('inp'); if (!firstPass) firstPass = row; }
+    if (/^#{1,3}\s/.test(ln) || /^title:/.test(ln)) row.classList.add('h');
+    const cuts = new Set([s, e]); for (const [a, b] of M) { if (a < e && b > s) { cuts.add(Math.max(a, s)); cuts.add(Math.min(b, e)); } }
+    const pts = [...cuts].sort((x, y) => x - y);
+    for (let k = 0; k < pts.length - 1; k++) {
+      const a = pts[k], b = pts[k + 1]; if (a === b) continue;
+      const piece = text.slice(a, b); const marked = M.some(([x, y]) => a >= x && b <= y);
+      if (marked) { const m = document.createElement('mark'); m.textContent = piece; c.append(m); if (!firstMark) firstMark = m; } else c.append(document.createTextNode(piece));
+    }
+    if (!ln) c.textContent = ' ';
+    row.append(n, c); frag.append(row);
+  });
+  rb.append(frag);
+  const target = firstMark || firstPass;
+  if (target) requestAnimationFrame(() => { const r = rb.getBoundingClientRect(), t = target.getBoundingClientRect(); rb.scrollTop += t.top - r.top - rb.clientHeight * 0.28; if (firstMark) { firstMark.classList.remove('flash'); void firstMark.offsetWidth; firstMark.classList.add('flash'); } });
+  else rb.scrollTop = 0;
+  $('legend').hidden = !hit; 
+}
+async function openDoc(file, hit) {
+  try { const d = await getDoc(file); paint(d, hit); $('pg').value = [...$('pg').options].some(o => o.value === file) ? file : ''; }
+  catch { $('rb').textContent = 'That page could not be loaded.'; }
+}
+const locate = (doc, src, answerText) => {
+  const text = doc.text; const hit = { passage: null, marks: [] };
+  const body = src.text.slice(src.text.indexOf('\n') + 1).trim();
+  const i = body ? text.indexOf(body) : -1;
+  if (i >= 0) hit.passage = [i, i + body.length];
+  if (answerText) for (const s of sentences(answerText)) { const j = text.indexOf(s); if (j >= 0) hit.marks.push([j, j + s.length]); }
+  return hit;
+};
+
+/* ---------- turn rendering ---------- */
+function selectSource(t, i, scrollIntoReader) {
+  selSrc = i; const src = t.sources[i]; if (!src) return;
+  document.querySelectorAll('#ev .row').forEach((r, k) => r.classList.toggle('sel', k === i));
+  $('step').hidden = false; $('stepLbl').textContent = `${i + 1} of ${t.sources.length}`;
+  getDoc(src.file).then(d => {
+    const cited = t.answer && !t.answer.abstained && t.answer.citations.some(c => c.id === src.id);
+    paint(d, locate(d, src, cited ? t.answer.text : ''));
+    $('pg').value = [...$('pg').options].some(o => o.value === src.file) ? src.file : '';
+  }).catch(() => { $('rb').textContent = 'That page could not be loaded.'; });
+  if (scrollIntoReader && matchMedia('(max-width:1000px)').matches) $('reader').scrollIntoView({ behavior: 'smooth' });
+}
+const step = d => { const t = turns[cur]; if (!t || !t.sources.length) return; selectSource(t, (selSrc + d + t.sources.length) % t.sources.length); };
+$('prev').onclick = () => step(-1); $('next').onclick = () => step(1);
+
+function renderEvidence(t) {
+  const ev = $('ev'); if (!t.sources.length) { ev.replaceChildren(); return; }
+  const max = Math.max(...t.sources.map(s => s.score)) || 1;
+  const cited = new Set(t.answer && !t.answer.abstained ? t.answer.citations.map(c => c.id) : []);
+  const h = document.createElement('h3'); h.textContent = t.answer && t.answer.abstained ? 'Closest passages, not an answer' : 'Passages retrieved';
+  const ol = document.createElement('ol');
+  t.sources.forEach((s, i) => {
+    const li = document.createElement('li'); const b = document.createElement('button'); b.type = 'button'; b.className = 'row' + (cited.has(s.id) ? ' cited' : '') + (i === selSrc ? ' sel' : '');
+    b.innerHTML = `<span class="no">${i + 1}</span><span><span class="t"></span><span class="f"></span></span><span class="bar2" title="score ${s.score}"><i></i></span>`;
+    b.querySelector('.t').textContent = s.heading || nice(s.file);
+    if (cited.has(s.id)) { const g = document.createElement('span'); g.className = 'tag'; g.textContent = 'ANSWER'; b.querySelector('.t').append(g); }
+    b.querySelector('.f').textContent = nice(s.file);
+    b.querySelector('.bar2 i').style.width = Math.max(6, Math.round(s.score / max * 100)) + '%';
+    b.onclick = () => selectSource(t, i, true); li.append(b); ol.append(li);
+  });
+  ev.replaceChildren(h, ol);
+}
+function renderAnswer(t) {
+  const a = $('ans'); const ans = t.answer;
+  $('qline').innerHTML = ''; const b = document.createElement('b'); b.textContent = t.q; $('qline').append('Q  ', b);
+  if (t.error) { a.className = 'ans err'; a.textContent = t.error; return; }
+  if (!ans) { a.className = 'ans'; a.innerHTML = '<div class="skel"></div><div class="skel s"></div>'; return; }
+  if (ans.abstained) {
+    a.className = 'ans refused'; a.replaceChildren();
+    const big = document.createElement('span'); big.className = 'big'; big.textContent = 'Not in the docs.';
+    const sm = document.createElement('span'); sm.className = 'sm'; sm.textContent = `${REASONS[ans.reason] || ''} The closest passages are below, in case they help.`;
+    a.append(big, sm);
+  } else {
+    a.className = 'ans'; a.replaceChildren();
+    const m = document.createElement('mark'); m.textContent = ans.text; a.append(m);
+    const order = t.sources.map(s => s.id);
+    (ans.citations || []).forEach(c => { const n = order.indexOf(c.id); if (n < 0) return; const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'cite'; bt.textContent = n + 1; bt.setAttribute('aria-label', `Show source ${n + 1}`); bt.onclick = () => selectSource(t, n, true); a.append(bt); });
+    const how = document.createElement('p'); how.className = 'how';
+    const mode = document.createElement('span'); mode.textContent = ans.mode === 'extractive' ? 'Copied from the source, nothing generated' : 'Written from the passages only';
+    const cp = document.createElement('button'); cp.type = 'button'; cp.textContent = 'Copy answer';
+    cp.onclick = async () => { try { await navigator.clipboard.writeText(ans.text); cp.textContent = 'Copied'; } catch { cp.textContent = 'Copy blocked'; } setTimeout(() => { cp.textContent = 'Copy answer'; }, 1500); };
+    how.append(mode, cp); a.append(how);
+  }
+}
+const show = i => {
+  cur = i; const t = turns[i]; app.classList.add('asked'); $('turn').hidden = false; $('chips').hidden = true;
+  renderAnswer(t);
+  const cites = t.answer && !t.answer.abstained && t.answer.citations.length ? t.sources.findIndex(s => s.id === t.answer.citations[0].id) : 0;
+  selSrc = Math.max(0, cites); renderEvidence(t); if (t.sources.length) selectSource(t, selSrc); else clearReader();
+  renderHist();
+};
+const renderHist = () => {
+  const list = turns.map((t, i) => [t, i]).filter(([, i]) => i !== cur).reverse();
+  $('earlier').hidden = !list.length; const ol = $('hist'); ol.replaceChildren();
+  for (const [t, i] of list) { const li = document.createElement('li'); const b = document.createElement('button'); b.type = 'button'; b.textContent = t.q; b.title = t.q; b.onclick = () => { show(i); $('desk').scrollTo({ top: 0, behavior: 'smooth' }); }; li.append(b); ol.append(li); }
+};
+
+async function ask(question) {
+  const t = { q: question, sources: [], answer: null, error: '' }; turns.push(t); cur = turns.length - 1; selSrc = -1;
+  app.classList.add('asked'); $('turn').hidden = false; $('chips').hidden = true;
+  renderAnswer(t); $('ev').replaceChildren(); renderHist(); clearReader();
+  $('q').value = ''; grow(); $('go').disabled = true; $('desk').scrollTo({ top: 0, behavior: 'smooth' });
+  let streamed = '';
+  try {
+    const res = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(collection ? { question, collection } : { question }) });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(res.status === 429 ? 'Too many questions. Wait a minute and try again.' : d.message || 'Something went wrong.'); }
+    const reader = res.body.getReader(); const decoder = new TextDecoder(); let buf = '';
+    while (true) {
+      const { value, done } = await reader.read(); if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf('\n\n')) >= 0) {
+        const line = buf.slice(0, i).trim(); buf = buf.slice(i + 2);
+        if (!line.startsWith('data:')) continue;
+        const ev = JSON.parse(line.slice(5));
+        if (ev.type === 'sources') { t.sources = ev.sources; if (cur === turns.indexOf(t)) { renderEvidence(t); selectSource(t, 0); } }
+        else if (ev.type === 'delta') { streamed += ev.text; if (cur === turns.indexOf(t)) { $('ans').className = 'ans'; $('ans').textContent = streamed; } }
+        else if (ev.type === 'answer') { t.answer = ev; if (cur === turns.indexOf(t)) show(turns.indexOf(t)); }
+        else if (ev.type === 'error') { t.error = ev.message; if (cur === turns.indexOf(t)) renderAnswer(t); }
+      }
+    }
+  } catch (err) { t.error = err.message; if (cur === turns.indexOf(t)) renderAnswer(t); }
+  finally { $('go').disabled = false; }
+}
 const MAXF = 8, MAXB = 150 * 1024; let picked = [];
 const renderPicked = () => {
   const ul = $('filelist'); ul.replaceChildren();
@@ -979,134 +1146,39 @@ $('index').onclick = async () => {
   try {
     const res = await fetch('/api/collections', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ files }) });
     const d = await res.json(); if (!res.ok) throw new Error(d.message || 'Could not index those documents.');
-    collection = d.id; $('forget').hidden = false; setScope(); $('q').disabled = false;
+    collection = d.id; collFiles = d.docs; $('forget').hidden = false; setScope(); fillPages(); $('q').disabled = false;
     const p = document.createElement('p'); p.className = 'indexed'; p.id = 'indexedNote'; p.textContent = `Indexed ${d.docs.length} document${d.docs.length === 1 ? '' : 's'} as ${d.chunks} passages. They expire in ${d.expiresInMinutes} minutes.`;
-    $('indexedNote')?.remove(); $('filelist').before(p); $('live').textContent = p.textContent; $('mineN').textContent = d.docs.length + ' file' + (d.docs.length === 1 ? '' : 's'); $('q').focus();
+    $('indexedNote')?.remove(); $('filelist').before(p); $('live').textContent = p.textContent; $('q').focus();
   } catch (e) { $('mineErr').textContent = e.message; }
   finally { $('index').textContent = 'Index documents'; renderPicked(); }
 };
-$('forget').onclick = async () => { if (collection) await fetch(`/api/collections/${collection}`, { method: 'DELETE' }).catch(() => {}); collection = null; picked = []; $('pasted').value = ''; $('indexedNote')?.remove(); $('forget').hidden = true; $('mineN').textContent = 'upload'; renderPicked(); setTab(true); };
+$('forget').onclick = async () => { if (collection) await fetch(`/api/collections/${collection}`, { method: 'DELETE' }).catch(() => {}); collection = null; collFiles = []; picked = []; $('pasted').value = ''; $('indexedNote')?.remove(); $('forget').hidden = true; renderPicked(); setTab(true); };
 
-const openNav = () => { app.classList.add('nav'); $('scrim').hidden = false; };
-const closeNav = () => { app.classList.remove('nav'); $('scrim').hidden = true; };
-$('menu').onclick = openNav; $('scrim').onclick = closeNav;
-$('howbtn').onclick = () => { closeNav(); $('how').showModal(); }; $('howclose').onclick = () => $('how').close();
+
 $('how').addEventListener('click', e => { if (e.target === $('how')) $('how').close(); });
+$('howbtn').onclick = () => $('how').showModal(); $('howclose').onclick = () => $('how').close();
 const THEME_KEY = 'documind-theme';
 try { const t = localStorage.getItem(THEME_KEY); if (t) document.documentElement.dataset.theme = t; } catch {}
 $('theme').onclick = () => {
-  const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  const next = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = next;
+  const cur2 = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const next = cur2 === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = next;
   try { localStorage.setItem(THEME_KEY, next); } catch {}
 };
-addEventListener('keydown', e => { if (e.key === '/' && !/INPUT|TEXTAREA/.test(document.activeElement.tagName) && !$('how').open) { e.preventDefault(); $('q').focus(); } });
+addEventListener('keydown', e => { if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !$('how').open) { e.preventDefault(); $('q').focus(); } });
 
-$('chips').innerHTML = EXAMPLES.map(q => `<button class="chip-q" type="button">${ARROW}<span>${esc(q)}</span></button>`).join('');
-$('chips').addEventListener('click', e => { const b = e.target.closest('.chip-q'); if (b) { $('q').value = b.textContent; $('form').requestSubmit(); } });
+$('chips').innerHTML = '';
+EXAMPLES.forEach(q => { const li = document.createElement('li'); const b = document.createElement('button'); b.type = 'button'; const s = document.createElement('span'); s.textContent = q; b.append(s); b.onclick = () => { $('q').value = q; $('form').requestSubmit(); }; li.append(b); $('chips').append(li); });
 
-const grow = () => { const q = $('q'); q.style.height = 'auto'; q.style.height = Math.min(q.scrollHeight, 140) + 'px'; };
+const grow = () => { const q = $('q'); q.style.height = 'auto'; q.style.height = Math.min(q.scrollHeight, 150) + 'px'; };
 $('q').addEventListener('input', grow);
 $('q').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('form').requestSubmit(); } });
+$('form').addEventListener('submit', e => { e.preventDefault(); const q = $('q').value.trim(); if (!q) return; if (mineTab && !collection) { $('mineErr').textContent = 'Index your documents first, then ask.'; return; } ask(q); });
 
 fetch('/api/health').then(r => r.json()).then(h => {
-  $('modeTxt').textContent = h.mode === 'extractive' ? 'Extractive mode' : `Model: ${h.mode}`;
-  $('mode').title = h.mode === 'extractive' ? 'Answers are copied from the best matching sentence. No text is generated.' : 'Answers are generated from retrieved passages only.';
-  $('expN').textContent = `${h.docs} pages`; $('stat').textContent = `${h.chunks} passages indexed`;
-}).catch(() => { $('modeTxt').textContent = 'Offline'; });
-
-const REASONS = {
-  unknown_terms: 'The question uses terms that never appear in these docs.',
-  low_coverage: 'No passage covers enough of what you asked to answer safely. These thresholds were tuned on the Express docs, so on your own documents they may be stricter or looser than ideal.',
-  model_abstained: 'The model found nothing in the retrieved passages that answers this.',
-  no_valid_citation: 'The model replied without citing a retrieved passage, so the reply was discarded.',
-};
-const nice = s => s.file.replace(/__/g, ' / ').replace('.mdx', '');
-let seq = 0;
-
-function stepEl(text, state, ms) { const li = document.createElement('li'); li.className = state; li.innerHTML = `<span class="tick"></span><span>${text}</span><em>${ms || ''}</em>`; return li; }
-
-async function ask(question) {
-  const id = 't' + (++seq);
-  app.classList.remove('empty');
-  const turn = document.createElement('article'); turn.className = 'turn'; turn.id = id;
-  const h = document.createElement('h2'); h.textContent = question;
-  const trace = document.createElement('ol'); trace.className = 'trace';
-  const cards = document.createElement('div'); cards.className = 'cards';
-  const ans = document.createElement('div'); ans.className = 'ans'; ans.innerHTML = '<div class="skel"></div><div class="skel s"></div>';
-  const pass = document.createElement('div'); pass.className = 'pass';
-  const s1 = stepEl(`Searching ${esc(NAME())}`, 'run');
-  trace.append(s1);
-  turn.append(h, trace, cards, ans, pass);
-  $('thread').append(turn);
-  const none = $('hist').querySelector('.none'); if (none) none.remove();
-  const li = document.createElement('li'); const hb = document.createElement('button'); hb.type = 'button'; hb.textContent = question; hb.title = question;
-  hb.onclick = () => { app.classList.remove('empty'); closeNav(); $('crumbPage').textContent = question; turn.scrollIntoView({ block: 'start' }); };
-  li.append(hb); $('hist').prepend(li);
-  $('crumbPage').textContent = question; $('crumbSrc').textContent = collection ? 'Your documents' : 'Express 5 docs';
-  $('q').value = ''; grow(); $('go').disabled = true; $('stat').textContent = 'Searching…';
-  requestAnimationFrame(() => turn.scrollIntoView({ block: 'start' }));
-  const t0 = performance.now();
-  let sources = []; let streamed = '';
-  const renderSources = (best = '', used = new Set()) => {
-    cards.replaceChildren(...sources.map((s, i) => {
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'card' + (used.has(s.id) ? ' used' : ''); b.dataset.n = i + 1;
-      b.innerHTML = `<span class="t">${esc(s.heading || nice(s))}</span><span class="m"><span class="n">${i + 1}</span><span>${esc(nice(s))}</span></span>`;
-      return b;
-    }));
-    pass.innerHTML = sources.length ? '<h3>Retrieved passages</h3>' + sources.map((s, i) => {
-      const body = esc(s.text.length > 1400 ? s.text.slice(0, 1400) + '…' : s.text);
-      const shown = best && body.includes(esc(best)) ? body.replace(esc(best), `<mark>${esc(best)}</mark>`) : body;
-      return `<div class="p ${used.has(s.id) ? 'on' : ''}" id="${id}-p${i + 1}"><header><span class="n">${i + 1}</span><span class="w">${esc(nice(s))}${s.heading ? ' · ' + esc(s.heading) : ''}</span><span>score ${s.score}</span></header><pre>${shown}</pre><button class="more" type="button">Show more</button></div>`;
-    }).join('') : '';
-  };
-  const openPassage = n => { const el = document.getElementById(`${id}-p${n}`); if (el) { el.classList.add('on', 'open'); const mb = el.querySelector('.more'); if (mb) mb.textContent = 'Show less'; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } };
-  turn.addEventListener('click', e => {
-    const c = e.target.closest('.card, .cite'); if (c) return openPassage(c.dataset.n);
-    const b = e.target.closest('.more'); if (b) { const card = b.closest('.p'); const open = card.classList.toggle('open'); b.textContent = open ? 'Show less' : 'Show more'; }
-  });
-  try {
-    const res = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(collection ? { question, collection } : { question }) });
-    if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(res.status === 429 ? 'Too many questions. Wait a minute and try again.' : d.message || 'Something went wrong.'); }
-    const reader = res.body.getReader(); const decoder = new TextDecoder(); let buf = '';
-    while (true) {
-      const { value, done } = await reader.read(); if (done) break;
-      buf += decoder.decode(value, { stream: true });
-      let i;
-      while ((i = buf.indexOf('\n\n')) >= 0) {
-        const line = buf.slice(0, i).trim(); buf = buf.slice(i + 2);
-        if (!line.startsWith('data:')) continue;
-        const ev = JSON.parse(line.slice(5));
-        const ms = Math.round(performance.now() - t0) + ' ms';
-        if (ev.type === 'sources') {
-          sources = ev.sources; renderSources();
-          s1.className = 'done'; s1.innerHTML = `<span class="tick"></span><span>Retrieved <b>${sources.length}</b> passages, keyword + semantic, reranked</span><em>${ms}</em>`;
-          trace.append(stepEl('Checking the passages cover your question', 'run'));
-        } else if (ev.type === 'delta') { streamed += ev.text; ans.textContent = streamed; }
-        else if (ev.type === 'answer') {
-          const last = trace.lastElementChild;
-          if (ev.abstained) {
-            last.className = 'done'; last.innerHTML = `<span class="tick"></span><span>Coverage too weak, so no answer was written</span><em>${ms}</em>`;
-            ans.className = 'ans refused';
-            ans.innerHTML = `<p class="hd">Not covered by ${esc(NAME())}</p><p>I can't answer that from ${esc(NAME())}, so I won't guess.</p><p class="why">${esc(REASONS[ev.reason] || '')} The closest passages are below in case they help.</p>`;
-          } else {
-            last.className = 'done'; last.innerHTML = `<span class="tick"></span><span>${ev.mode === 'extractive' ? 'Copied the best matching sentence' : 'Wrote from the passages'}, with citations</span><em>${ms}</em>`;
-            const ids = new Set(ev.citations.map(c => c.id)); const order = sources.map(s => s.id);
-            let html = esc(ev.text).replace(/\[(\d+)\]/g, (m, n) => `<button class="cite" data-n="${n}" aria-label="Open source ${n}">${n}</button>`);
-            if (!/class="cite"/.test(html) && ev.citations.length) html += ' ' + ev.citations.map(c => { const n = order.indexOf(c.id) + 1; return `<button class="cite" data-n="${n}" aria-label="Open source ${n}">${n}</button>`; }).join('');
-            ans.className = 'ans'; ans.innerHTML = `<p>${html}</p><div class="acts"><button class="act" type="button" data-copy>Copy answer</button><span>${ev.mode === 'extractive' ? 'Extractive: no text was generated' : 'Generated from passages only'}</span></div>`;
-            ans.querySelector('[data-copy]').onclick = async e => { const b = e.currentTarget; try { await navigator.clipboard.writeText(ev.text); b.textContent = 'Copied'; } catch { b.textContent = 'Copy blocked'; } setTimeout(() => { b.textContent = 'Copy answer'; }, 1500); };
-            renderSources(ev.mode === 'extractive' ? ev.text.split(/(?<=[.!?])\s+/)[0] : '', ids);
-          }
-          $('stat').textContent = `Answered in ${ms}`;
-        } else if (ev.type === 'error') { ans.className = 'ans err'; ans.textContent = ev.message; }
-      }
-    }
-  } catch (err) { ans.className = 'ans err'; ans.textContent = err.message; $('stat').textContent = 'Error'; }
-  finally { $('go').disabled = false; }
-}
-
-$('form').addEventListener('submit', e => { e.preventDefault(); const q = $('q').value.trim(); if (!q) return; if (mineTab && !collection) { $('mineErr').textContent = 'Index your documents first, then ask.'; return; } ask(q); });
-document.querySelector('.brand').addEventListener('click', e => { e.preventDefault(); setTab(false); closeNav(); $('q').focus(); });
+  $('modeline').textContent = h.mode === 'extractive' ? `${h.chunks} passages · extractive, no text generated` : `${h.chunks} passages · model: ${h.mode}`;
+  $('modeline').title = h.mode === 'extractive' ? 'Answers are copied from the best matching sentence.' : 'Answers are generated from retrieved passages only.';
+  corpusFiles = h.files || []; fillPages();
+}).catch(() => { $('modeline').textContent = 'Offline'; });
 
 })();
 </script>

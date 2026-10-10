@@ -38,7 +38,7 @@ const readBody = (req, max = MAX_BODY) => new Promise((resolve, reject) => {
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   try {
-    if (req.method === 'GET' && url.pathname === '/api/health') return json(res, 200, { status: 'ok', mode: pipeline.mode, docs: pipeline.docCount, chunks: pipeline.chunkCount });
+    if (req.method === 'GET' && url.pathname === '/api/health') return json(res, 200, { status: 'ok', mode: pipeline.mode, docs: pipeline.docCount, chunks: pipeline.chunkCount, files: pipeline.docs });
     if (req.method === 'POST' && url.pathname === '/api/collections') {
       if (limited(req.socket.remoteAddress || 'unknown')) return json(res, 429, { error: 'rate_limited' });
       if (building) return json(res, 429, { error: 'busy', message: 'Another set of documents is being indexed. Try again in a few seconds.' });
@@ -65,6 +65,13 @@ const server = createServer(async (req, res) => {
         collections.set(id, { pipeline: p, created: Date.now() });
         return json(res, 201, { id, docs: p.docs, chunks: p.chunkCount, expiresInMinutes: UPLOAD.ttlMs / 60_000 });
       } finally { building = false; }
+    }
+    if (req.method === 'GET' && url.pathname === '/api/doc') {
+      let target = pipeline; const cid = url.searchParams.get('collection');
+      if (cid !== null) { sweepCollections(); const c = /^[0-9a-f]{32}$/.test(cid) && collections.get(cid); if (!c) return json(res, 404, { error: 'collection_not_found' }); target = c.pipeline; }
+      const d = target.doc(url.searchParams.get('file') || '');
+      if (!d) return json(res, 404, { error: 'doc_not_found' });
+      return json(res, 200, d);
     }
     const del = url.pathname.match(/^\/api\/collections\/([0-9a-f]{32})$/);
     if (del && req.method === 'DELETE') { collections.delete(del[1]); return json(res, 200, { ok: true }); }

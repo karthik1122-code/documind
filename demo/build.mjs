@@ -37,7 +37,7 @@ const server = `
     const url = new URL(typeof input === 'string' ? input : input.url, location.href), method = (init.method || 'GET').toUpperCase(), p = url.pathname;
     if (!p.includes('/api/')) return realFetch(input, init);
     const path = p.slice(p.indexOf('/api/')), body = init.body ? JSON.parse(init.body) : {};
-    if (method === 'GET' && path === '/api/health') return json(200, { status: 'ok', mode: pipeline.mode, docs: pipeline.docCount, chunks: pipeline.chunkCount });
+    if (method === 'GET' && path === '/api/health') return json(200, { status: 'ok', mode: pipeline.mode, docs: pipeline.docCount, chunks: pipeline.chunkCount, files: pipeline.docs });
     if (method === 'POST' && path === '/api/collections') {
       const files = Array.isArray(body.files) ? body.files : [];
       if (!files.length || files.length > UPLOAD.maxFiles) return json(400, { error: 'invalid_files', message: 'Add between 1 and ' + UPLOAD.maxFiles + ' documents.' });
@@ -52,6 +52,11 @@ const server = `
       let pp; try { pp = createPipeline({ docs, maxChunks: UPLOAD.maxChunks }); } catch (e) { if (e.code === 'empty' || e.code === 'too_many_chunks') return json(422, { error: e.code, message: e.message }); throw e; }
       const id = rid(); collections.set(id, pp);
       return json(201, { id, docs: pp.docs, chunks: pp.chunkCount, expiresInMinutes: 60 });
+    }
+    if (method === 'GET' && path === '/api/doc') {
+      const cid = url.searchParams.get('collection'); const target = cid === null ? pipeline : collections.get(cid);
+      const d = target && target.doc(url.searchParams.get('file') || '');
+      return d ? json(200, d) : json(404, { error: 'doc_not_found' });
     }
     const del = path.match(/^\\/api\\/collections\\/([0-9a-f]{32})$/);
     if (del && method === 'DELETE') { collections.delete(del[1]); return json(200, { ok: true }); }
