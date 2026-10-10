@@ -39,8 +39,8 @@ What this shows:
 
 1. **Bigger chunks look better but cost more.** Recall rises with chunk size because a larger chunk is more likely to contain the evidence. The last column shows what that costs: fixed 1600 hands the model about 4.6K characters per question, four times the 400-character setting.
 2. **Structure-aware chunking wins at equal cost.** At about 2.2K characters of context, sections 800 beats fixed 800 on recall@1 (65.7% vs 51.4%) and recall@3 (80.0% vs 74.3%). Splitting on headings, and prefixing each chunk with its page title and heading, keeps an answer in one piece.
-3. **Paraphrased questions are the weak spot for keyword search.** Two questions (q01, q23) are missed even at k=5, and both reword the docs heavily. This is what embeddings and hybrid search are meant to fix, and the next step measures whether they do.
-4. **A score threshold cannot reliably tell "not covered" from "covered".** The highest BM25 score on an unanswerable question (9.1) is higher than the lowest on an answerable one (6.2), because words like "express" and "Redis" still match. Deciding when to abstain needs the answer step plus its own evaluation.
+3. **Paraphrased questions are the weak spot for keyword search.** In the best configuration (fixed 1600) two questions, q01 and q23, are still missed at k=5, and both reword the docs heavily. This is what embeddings and hybrid search are meant to fix, and the next step measures whether they do.
+4. **A score threshold cannot reliably tell "not covered" from "covered".** In that same configuration the highest BM25 score on an unanswerable question (9.1) is higher than the lowest on an answerable one (6.2), because words like "express" and "Redis" still match. Deciding when to abstain needs the answer step plus its own evaluation.
 
 ## Roadmap
 
