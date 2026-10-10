@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 const PORT = 4195, base = `http://127.0.0.1:${PORT}`;
 let child;
 before(async () => {
-  child = spawn(process.execPath, ['server.mjs'], { env: { ...process.env, PORT: String(PORT), GEMINI_API_KEY: '' }, stdio: ['ignore', 'pipe', 'inherit'] });
+  child = spawn(process.execPath, ['server.mjs'], { env: { ...process.env, PORT: String(PORT), GEMINI_API_KEY: '', RATE_LIMIT: '500' }, stdio: ['ignore', 'pipe', 'inherit'] });
   await new Promise((resolve, reject) => { child.stdout.on('data', d => String(d).includes('ready') && resolve()); child.on('error', reject); setTimeout(() => reject(new Error('server did not start')), 8000); });
 });
 after(() => child.kill());
@@ -44,7 +44,7 @@ test('input is validated: empty, oversized and malformed bodies are rejected', a
   assert.equal((await post(JSON.stringify({ question: '  ' }))).status, 400);
   assert.equal((await post(JSON.stringify({ question: 'x'.repeat(401) }))).status, 400);
   assert.equal((await post('not json')).status, 400);
-  assert.equal((await post(JSON.stringify({ question: 'x', pad: 'y'.repeat(5000) }))).status, 413);
+  assert.equal((await post(JSON.stringify({ question: 'x', pad: 'y'.repeat(230 * 1024) }))).status, 413);
 });
 
 test('only public/ is served and security headers are set', async () => {
@@ -119,4 +119,37 @@ test('source reader: returns a corpus page in full, refuses unknown files and pa
   assert.equal((await fetch(`${base}/api/doc?file=../server.mjs`)).status, 404);
   assert.equal((await fetch(`${base}/api/doc?file=nope.mdx`)).status, 404);
   assert.equal((await fetch(`${base}/api/doc?file=a.md&collection=${'0'.repeat(32)}`)).status, 404);
+});
+
+test('landing page and app are served, and neither uses inline script or style (the CSP forbids both)', async () => {
+  for (const path of ['/', '/app']) {
+    const res = await fetch(`${base}${path}`); const html = await res.text();
+    assert.equal(res.status, 200, path); assert.match(res.headers.get('content-type'), /text\/html/);
+    assert.doesNotMatch(html, /<script(?![^>]*\bsrc=)/i, path + ' has an inline script');
+    assert.doesNotMatch(html, /<style[\s>]/i, path + ' has an inline style block');
+    assert.doesNotMatch(html, /\sstyle="/i, path + ' has an inline style attribute');
+  }
+});
+
+test('your documents: an unknown collection id is rebuilt from the files the browser sends again', async () => {
+  const id = 'ab'.repeat(16);
+  const ask = body => fetch(`${base}/api/ask`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  assert.equal((await ask({ question: 'Are dogs allowed in the lobby?', collection: id })).status, 404);
+  const res = await ask({ question: 'Are dogs allowed in the lobby?', collection: id, files: [{ name: 'handbook.md', text: POLICY }] });
+  assert.equal(res.status, 200);
+  const events = (await res.text()).split('\n\n').filter(l => l.startsWith('data:')).map(l => JSON.parse(l.slice(5)));
+  assert.match(events.find(e => e.type === 'answer').text, /leash/i);
+  assert.equal((await ask({ question: 'Are dogs allowed in the lobby?', collection: id })).status, 200);
+  assert.equal((await ask({ question: 'x', collection: id.replace(/a/g, 'z'), files: [{ name: 'a.exe', text: 'hi' }] })).status, 404);
+});
+
+test('rate limit: the 4th question in a minute is refused with 429 when the limit is 3', async () => {
+  const port = 4197;
+  const c = spawn(process.execPath, ['server.mjs'], { env: { ...process.env, PORT: String(port), GEMINI_API_KEY: '', RATE_LIMIT: '3' }, stdio: ['ignore', 'pipe', 'inherit'] });
+  try {
+    await new Promise((resolve, reject) => { c.stdout.on('data', d => String(d).includes('ready') && resolve()); c.on('error', reject); setTimeout(() => reject(new Error('server did not start')), 8000); });
+    const codes = [];
+    for (let i = 0; i < 4; i++) { const r = await fetch(`http://127.0.0.1:${port}/api/ask`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: 'How do I make part of a route path optional?' }) }); codes.push(r.status); await r.text(); }
+    assert.deepEqual(codes, [200, 200, 200, 429]);
+  } finally { c.kill(); }
 });

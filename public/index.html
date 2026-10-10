@@ -3,104 +3,112 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DocuMind</title>
-<meta name="description" content="Ask questions about the Express 5 documentation or your own files. Every answer is marked at its source, and questions the docs do not cover are refused.">
+<title>DocuMind: every answer, marked at the source</title>
+<meta name="description" content="Ask the Express 5 documentation or your own files. DocuMind answers with the exact sentence, highlights it on the original page, and says not in the docs when it can't.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/landing.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230e0e10'/%3E%3Crect x='5' y='12' width='22' height='9' rx='2' fill='%23ff2e93'/%3E%3C/svg%3E">
 </head>
-<body>
-<div class="app" id="app">
-  <header class="bar">
-    <a class="word" id="brand" href="#" aria-label="DocuMind home">Docu<span class="mk">Mind</span></a>
-    <div class="seg" role="tablist" aria-label="What to ask about">
-      <button class="on" id="tab-express" role="tab" aria-selected="true" type="button">Express 5 docs</button>
-      <button id="tab-mine" role="tab" aria-selected="false" type="button">Your documents</button>
+<body class="landing">
+<div id="land">
+  <nav class="lp-nav" aria-label="Primary"><div class="lp-wrap">
+    <a class="word" href="/" aria-label="DocuMind home">Docu<span class="mk">Mind</span></a>
+    <div class="lp-links"><a href="#how">How it works</a><a href="#evidence">Measurements</a><a href="#errata">Errata</a></div>
+    <span class="lp-sp"></span>
+    <button class="icon" id="lpTheme" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3 5.5 5.5 0 1 0 13 9.5z"/></svg></button>
+    <a class="lp-btn sm" href="/app">Open the app</a>
+  </div></nav>
+
+  <header class="lp-hero"><div class="lp-wrap">
+    <h1>Every answer, <span class="hl">marked at the source.</span></h1>
+    <div class="lp-intro">
+      <div><p>Ask the Express 5 documentation a question. DocuMind answers with the exact sentence, highlights it on the original page, and says "not in the docs" when it can't.</p><p class="lp-fine">No account and no API key. Uploaded files are never written to disk.</p></div>
+      <div class="lp-cta"><a class="lp-btn lg" href="/app">Try it live</a><a class="lp-btn lg out" href="#evidence">See the measurements</a></div>
     </div>
-    <span class="grow"></span>
-    <span class="modeline" id="modeline" title="How answers are produced">Checking…</span>
-    <button class="txtbtn" id="howbtn" type="button">How it works</button>
-    <button class="icon" id="theme" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3 5.5 5.5 0 1 0 13 9.5z"/></svg></button>
-  </header>
+    <div class="spec" aria-label="Live example: the real pipeline answering two questions">
+      <div class="sp-l"><p class="sp-q" id="dq"></p><div class="sp-a" id="da"></div><p class="sp-m" id="dm"></p></div>
+      <div class="sp-r"><div class="sp-h"><span id="dh">guide / routing</span><span id="dl"></span></div><div class="sp-sheet" id="ds"></div></div>
+    </div>
+  </div></header>
 
-  <div class="deck" id="deck">
-    <section class="desk" id="desk" aria-label="Ask">
-      <div class="desk-in">
-        <div class="intro" id="intro">
-          <h1 id="h1">What do you want to <span class="hl">find</span>?</h1>
-          <p id="introp">Answers are marked at the source: the exact sentence, on the exact page. If the docs don't cover it, you get a refusal, not a guess.</p>
-        </div>
 
-        <section class="mine" id="panel-mine" hidden aria-label="Add your documents">
-          <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files or drop them here">
-            <strong>Drop .md or .txt files</strong><span>or choose files · up to 8 files, 150 KB total</span>
-            <input id="files" type="file" accept=".md,.mdx,.txt,text/plain,text/markdown" multiple hidden>
-          </div>
-          <details class="paste"><summary>Or paste text</summary>
-            <label class="sr" for="pasted">Pasted document text</label>
-            <textarea id="pasted" rows="6" maxlength="150000" placeholder="# Title&#10;## A section&#10;Text you want to ask questions about"></textarea>
-          </details>
-          <ul id="filelist" class="filelist" aria-live="polite"></ul>
-          <p class="privacy">Indexed in this server's memory for one hour, behind a private link, never written to disk. Don't upload anything confidential to a public demo.</p>
-          <p id="mineErr" class="err" role="alert"></p>
-          <div class="mineActions"><button id="index" class="solid" type="button" disabled>Index documents</button><button id="forget" class="plain" type="button" hidden>Remove my documents</button></div>
-        </section>
+  <div class="lp-mq" aria-label="Example questions and what DocuMind did with them"><div class="lp-mq-t" id="mq"></div></div>
 
-        <form id="form" class="ask" autocomplete="off">
-          <label for="q" class="sr">Your question</label>
-          <textarea id="q" name="q" rows="1" maxlength="400" placeholder="Ask about routing, middleware, error handling" required></textarea>
-          <button id="go" class="solid" type="submit">Ask<kbd>Enter</kbd></button>
-        </form>
-        <p class="sr" id="live" aria-live="polite"></p>
-
-        <ol class="idx" id="chips" aria-label="Example questions"></ol>
-
-        <article class="turn" id="turn" hidden>
-          <p class="qline" id="qline"></p>
-          <div class="ans" id="ans"></div>
-          <div class="ev" id="ev"></div>
-        </article>
-
-        <section class="earlier" id="earlier" hidden>
-          <h3>Earlier this session</h3>
-          <ol id="hist"></ol>
-        </section>
+  <section class="lp-story" id="story" aria-label="How one question gets answered"><div class="lp-pin">
+    <div class="lp-pin-l">
+      <div><h2>One question, four checks.</h2></div>
+      <div>
+        <ol class="lp-steps" id="steps">
+          <li class="on"><i>01</i><div><b>Split</b><span>Pages are cut at headings. Each passage keeps its page title and heading.</span></div></li>
+          <li><i>02</i><div><b>Retrieve</b><span>Keyword search and a semantic index vote. A reranker orders the best five.</span></div></li>
+          <li><i>03</i><div><b>Check</b><span>The best sentence must cover enough of the question, or there is no answer.</span></div></li>
+          <li><i>04</i><div><b>Mark</b><span>The sentence is copied, cited, and highlighted on the original page.</span></div></li>
+        </ol>
+        <div class="lp-prog"><i id="prog"></i></div>
       </div>
-      <footer class="foot">
-        <p>Corpus: Express 5 documentation, © The Express Contributors, <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a>. Not affiliated with or endorsed by Express.</p>
-        <p>Built by Karthik Uppari</p>
-      </footer>
-    </section>
+    </div>
+    <div class="lp-pin-r">
+      <div class="lp-pn on" id="pn0"><h4 id="pn0h"></h4><div class="pg-s" id="pn0b"></div></div>
+      <div class="lp-pn" id="pn1"><h4 id="pn1h"></h4><div id="pn1b" class="dc"></div></div>
+      <div class="lp-pn" id="pn2"><h4>Coverage of the question by the best sentence</h4><div class="gg" id="pn2b"></div></div>
+      <div class="lp-pn" id="pn3"><h4 id="pn3h"></h4><div class="lp-big" id="pn3a"></div><div class="pg-s" id="pn3b"></div></div>
+    </div>
+  </div></section>
 
-    <aside class="reader" id="reader" aria-label="Source reader">
-      <header class="rh">
-        <label class="sr" for="pg">Page</label>
-        <select id="pg"></select>
-        <div class="step" id="step" hidden>
-          <button type="button" id="prev" aria-label="Previous passage">&lsaquo;</button>
-          <span id="stepLbl">1 of 5</span>
-          <button type="button" id="next" aria-label="Next passage">&rsaquo;</button>
-        </div>
-      </header>
-      <div class="rb" id="rb" tabindex="0" aria-label="Page text">
-        <div class="empty-r" id="emptyR"><p>The page an answer came from opens here, with the answer marked.</p><p>Or pick any page above to read it.</p></div>
+  <section class="lp-sec" id="how"><div class="lp-wrap">
+    <h2>Small enough to read. Measured before it was trusted.</h2>
+    <p class="lede">Each stage was kept or dropped because a number said so.</p>
+    <div class="lp-3">
+      <div><h3>Chunk</h3><p>Pages are split at headings. Each passage keeps its page title and heading, so a bare paragraph still has context.</p><div class="big" id="nChunks">198</div><div class="cap">passages from <span id="nDocs">16</span> pages</div></div>
+      <div><h3>Retrieve</h3><p>Keyword search and a local semantic index each vote. A reranker orders the top five.</p><div class="big">71.4%</div><div class="cap">right passage ranked first</div></div>
+      <div><h3>Answer or refuse</h3><p>Only from those passages. Unknown words or weak coverage mean a refusal, not a guess.</p><div class="big">15 / 15</div><div class="cap">uncovered questions refused</div></div>
+    </div>
+  </div></section>
+
+  <section class="lp-sec" id="evidence"><div class="lp-wrap">
+    <h2>The numbers, including the one I'd rather hide.</h2>
+    <p class="lede">Fifty questions written for this corpus: 35 the docs answer, 15 they don't.</p>
+    <div class="lp-ev" id="lpEv">
+      <div><h3>Right passage ranked first</h3><p class="s">retrieval recall@1 · 35 answerable questions</p>
+        <div class="lp-row"><span>Semantic vectors</span><div class="tr"><div class="fl" data-w="40"></div></div><b>40.0%</b></div>
+        <div class="lp-row"><span>LSA only</span><div class="tr"><div class="fl" data-w="54.3"></div></div><b>54.3%</b></div>
+        <div class="lp-row"><span>Keyword + semantic</span><div class="tr"><div class="fl" data-w="57.1"></div></div><b>57.1%</b></div>
+        <div class="lp-row"><span>Keyword (BM25)</span><div class="tr"><div class="fl" data-w="65.7"></div></div><b>65.7%</b></div>
+        <div class="lp-row"><span>Keyword + reranker</span><div class="tr"><div class="fl" data-w="68.6"></div></div><b>68.6%</b></div>
+        <div class="lp-row hi"><span>Hybrid + reranker</span><div class="tr"><div class="fl" data-w="71.4"></div></div><b>71.4%</b></div>
       </div>
-      <p class="legend" id="legend" hidden><i class="k-m"></i>answer <i class="k-p"></i>retrieved passage</p>
-    </aside>
-  </div>
+      <div><h3>Answering, held-out half</h3><p class="s">extractive mode · settings chosen on the other half</p>
+        <div class="lp-st"><b>100%</b><p>of uncovered questions refused. Zero false answers.</p></div>
+        <div class="lp-st"><b class="warn">29%</b><p>of answerable questions answered correctly. Safe and conservative, not smart.</p></div>
+        <div class="lp-st"><b>Pending</b><p>Model-written answers and prompt-injection results need an API key. No number is claimed until they run.</p></div>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="lp-sec" id="errata"><div class="lp-wrap">
+    <h2>Errata: what this does not claim.</h2>
+    <p class="lede">Read these before trusting any number above.</p>
+    <ol class="lp-err">
+      <li><span class="d">1</span><span><b>Small benchmark.</b> The questions were written by the author for one corpus. With 35 answerable questions, one question is 2.9 percentage points.</span></li>
+      <li><span class="d">2</span><span><b>Paraphrases stay hard.</b> Two questions are missed by every local method because they share almost no words with the answer. That is the case for a neural embedding model.</span></li>
+      <li><span class="d">3</span><span><b>Thresholds are tuned on Express.</b> On your own documents the refusals may be stricter or looser than ideal. I haven't measured it.</span></li>
+      <li><span class="d">4</span><span><b>This site is extractive.</b> Until a model key is set on the server, it copies the best sentence. It doesn't write answers, so it can't invent one.</span></li>
+    </ol>
+  </div></section>
+
+  <section class="lp-final"><div class="lp-wrap">
+    <h2>Ask it something it <span class="hl">can't</span> answer.</h2>
+    <a class="lp-btn lg" href="/app">Open the app</a>
+  </div></section>
+
+  <footer class="lp-foot"><div class="lp-wrap">
+    <p>Corpus: Express 5 documentation, © The Express Contributors, <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a>. This project is not affiliated with or endorsed by Express.</p>
+    <p>Built by Karthik Uppari.</p>
+  </div></footer>
 </div>
 
-<dialog id="how" aria-labelledby="howh">
-  <h2 id="howh">How DocuMind answers</h2>
-  <ol>
-    <li><b>Chunk</b><span>Pages are split at headings, so an answer stays in one piece.</span></li>
-    <li><b>Retrieve</b><span>Keyword search and a local semantic index each vote, then a reranker orders the top passages.</span></li>
-    <li><b>Answer or refuse</b><span>Only from those passages, with the source marked. Unknown words or weak matches mean a refusal.</span></li>
-  </ol>
-  <p>Measured on a 50-question set written for this corpus. The tables and their limits are in the repository's <code>eval/results</code>.</p>
-  <button class="solid" id="howclose" type="button">Close</button>
-</dialog>
-<script src="/app.js" type="module"></script>
+<script src="/landing.js" type="module"></script>
 </body>
 </html>

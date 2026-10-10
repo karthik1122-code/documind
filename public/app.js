@@ -18,6 +18,7 @@ const nice = f => f.replace(/__/g, ' / ').replace(/\.(mdx|md|txt)$/, '');
 const sentences = t => t.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
 
 let collection = null, mineTab = false, collFiles = [], corpusFiles = [];
+let collPayload = []; const collTexts = new Map();
 const docCache = new Map();
 const turns = []; let cur = -1; let selSrc = -1;
 
@@ -29,13 +30,12 @@ const setScope = () => {
   $('panel-mine').hidden = !mineTab;
 };
 const setTab = mine => {
-  mineTab = mine; if (!mine) { collection = null; collFiles = []; }
+  mineTab = mine; if (!mine) { collection = null; collFiles = []; collPayload = []; collTexts.clear(); }
   $('tab-express').classList.toggle('on', !mine); $('tab-mine').classList.toggle('on', mine);
   $('tab-express').setAttribute('aria-selected', String(!mine)); $('tab-mine').setAttribute('aria-selected', String(mine));
   app.classList.remove('asked'); $('turn').hidden = true; setScope(); fillPages(); clearReader();
 };
 $('tab-express').onclick = () => setTab(false); $('tab-mine').onclick = () => setTab(true);
-$('brand').addEventListener('click', e => { e.preventDefault(); setTab(false); $('q').focus(); });
 
 /* ---------- reader ---------- */
 const fillPages = () => {
@@ -46,8 +46,9 @@ const fillPages = () => {
 };
 $('pg').onchange = () => { const f = $('pg').value; if (f) openDoc(f, null); };
 const getDoc = async file => {
-  const key = (collection || 'c') + '|' + file; if (docCache.has(key)) return docCache.get(key);
-  const res = await fetch(`/api/doc?file=${encodeURIComponent(file)}${collection ? '&collection=' + collection : ''}`);
+  if (collection) { if (collTexts.has(file)) return { file, text: collTexts.get(file) }; throw new Error('page'); }
+  const key = 'c|' + file; if (docCache.has(key)) return docCache.get(key);
+  const res = await fetch(`/api/doc?file=${encodeURIComponent(file)}`);
   if (!res.ok) throw new Error('page');
   const d = await res.json(); docCache.set(key, d); return d;
 };
@@ -168,7 +169,9 @@ async function ask(question) {
   $('q').value = ''; grow(); $('go').disabled = true; $('desk').scrollTo({ top: 0, behavior: 'smooth' });
   let streamed = '';
   try {
-    const res = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(collection ? { question, collection } : { question }) });
+    const post = extra => fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(collection ? { question, collection, ...extra } : { question }) });
+    let res = await post();
+    if (res.status === 404 && collection && collPayload.length) res = await post({ files: collPayload });
     if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(res.status === 429 ? 'Too many questions. Wait a minute and try again.' : d.message || 'Something went wrong.'); }
     const reader = res.body.getReader(); const decoder = new TextDecoder(); let buf = '';
     while (true) {
@@ -217,13 +220,13 @@ $('index').onclick = async () => {
   try {
     const res = await fetch('/api/collections', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ files }) });
     const d = await res.json(); if (!res.ok) throw new Error(d.message || 'Could not index those documents.');
-    collection = d.id; collFiles = d.docs; $('forget').hidden = false; setScope(); fillPages(); $('q').disabled = false;
+    collection = d.id; collFiles = d.docs; collPayload = files; collTexts.clear(); d.docs.forEach((n, i) => collTexts.set(n, files[i].text.replace(/\r\n/g, '\n').replace(/\u0000/g, ''))); $('forget').hidden = false; setScope(); fillPages(); $('q').disabled = false;
     const p = document.createElement('p'); p.className = 'indexed'; p.id = 'indexedNote'; p.textContent = `Indexed ${d.docs.length} document${d.docs.length === 1 ? '' : 's'} as ${d.chunks} passages. They expire in ${d.expiresInMinutes} minutes.`;
     $('indexedNote')?.remove(); $('filelist').before(p); $('live').textContent = p.textContent; $('q').focus();
   } catch (e) { $('mineErr').textContent = e.message; }
   finally { $('index').textContent = 'Index documents'; renderPicked(); }
 };
-$('forget').onclick = async () => { if (collection) await fetch(`/api/collections/${collection}`, { method: 'DELETE' }).catch(() => {}); collection = null; collFiles = []; picked = []; $('pasted').value = ''; $('indexedNote')?.remove(); $('forget').hidden = true; renderPicked(); setTab(true); };
+$('forget').onclick = async () => { if (collection) await fetch(`/api/collections/${collection}`, { method: 'DELETE' }).catch(() => {}); collection = null; collFiles = []; collPayload = []; collTexts.clear(); picked = []; $('pasted').value = ''; $('indexedNote')?.remove(); $('forget').hidden = true; renderPicked(); setTab(true); };
 
 
 $('how').addEventListener('click', e => { if (e.target === $('how')) $('how').close(); });
