@@ -3,71 +3,99 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DocuMind · Ask the docs, with receipts</title>
-<meta name="description" content="Question answering over the Express 5 documentation. Every answer cites its source passage, and questions the docs do not cover are refused.">
+<title>DocuMind</title>
+<meta name="description" content="Ask questions about the Express 5 documentation or your own files. Every answer cites the exact passage, and questions the docs do not cover are refused.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f3d36'/%3E%3Cpath d='M9 10h9a5 5 0 0 1 0 10H9zM9 20h10' fill='none' stroke='%23f4efe6' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%236b7bff'/%3E%3Cpath d='M10 9.5h6.5a6.5 6.5 0 0 1 0 13H10z' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linejoin='round'/%3E%3C/svg%3E">
 </head>
 <body>
-<header class="top">
-  <a class="brand" href="/" aria-label="DocuMind home"><span class="mark" aria-hidden="true"></span>DocuMind</a>
-  <span class="mode" id="mode" title="How answers are produced">Checking…</span>
-</header>
+<div class="app empty" id="app">
+  <aside class="rail" id="rail" aria-label="Sidebar">
+    <a class="brand" href="/" aria-label="DocuMind home"><span class="mark" aria-hidden="true"></span>DocuMind</a>
+    <button class="newq" id="newq" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>New question<kbd>/</kbd></button>
 
-<main>
-  <section class="hero">
-    <p class="eyebrow">Retrieval-augmented Q&amp;A · evaluated, not guessed</p>
-    <h1 id="h1">Ask the Express 5 docs.<br><em>Get the passage, not a guess.</em></h1>
-    <p class="lede">Every answer points to the exact paragraph it came from. If the docs don't cover your question, DocuMind says so instead of making something up.</p>
-    <p class="sr" id="live" aria-live="polite"></p>
-
-    <div class="tabs" role="tablist" aria-label="What to ask about">
-      <button class="tab on" id="tab-express" role="tab" aria-selected="true" aria-controls="panel-ask" type="button">Express 5 docs</button>
-      <button class="tab" id="tab-mine" role="tab" aria-selected="false" aria-controls="panel-mine" type="button">Your documents</button>
+    <p class="grp">Library</p>
+    <div class="lib" role="tablist" aria-label="What to ask about">
+      <button class="src-btn on" id="tab-express" role="tab" aria-selected="true" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h7l3 3v8H3zM10 2.5v3h3"/></svg><span>Express 5 docs</span><i id="expN"></i></button>
+      <button class="src-btn" id="tab-mine" role="tab" aria-selected="false" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11V3M4.5 6.5 8 3l3.5 3.5M3 13h10"/></svg><span>Your documents</span><i id="mineN">upload</i></button>
     </div>
-    <section id="panel-mine" class="mine" hidden aria-label="Add your documents">
-      <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files or drop them here">
-        <strong>Drop .md or .txt files here</strong><span>or choose files. Up to 8 files and 150 KB in total.</span>
-        <input id="files" type="file" accept=".md,.mdx,.txt,text/plain,text/markdown" multiple hidden>
+
+    <p class="grp">This session</p>
+    <ol class="hist" id="hist" aria-label="Questions asked in this session"><li class="none">Nothing asked yet.</li></ol>
+
+    <div class="railfoot">
+      <button class="linkbtn" id="howbtn" type="button">How it works</button>
+      <p>Corpus: Express 5 docs, © The Express Contributors, <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a>. Not affiliated with Express.</p>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="col">
+    <header class="topbar">
+      <button class="icon menu" id="menu" type="button" aria-label="Open sidebar"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></svg></button>
+      <nav class="crumb" aria-label="Breadcrumb"><span id="crumbSrc">Express 5 docs</span><span class="sep">/</span><b id="crumbPage">New question</b></nav>
+      <span class="chip" id="mode" title="How answers are produced"><i class="dot"></i><span id="modeTxt">Checking…</span></span>
+      <button class="icon" id="theme" type="button" aria-label="Switch light or dark theme"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3 5.5 5.5 0 1 0 13 9.5z"/></svg></button>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <div class="greet" id="greet">
+        <h1 id="h1">What do you want to find in the Express 5 docs?</h1>
+        <p>Answers come with the exact passage they were taken from. If the docs don't cover it, you get a refusal, not a guess.</p>
       </div>
-      <details class="paste"><summary>Or paste text</summary>
-        <label class="sr" for="pasted">Pasted document text</label>
-        <textarea id="pasted" rows="6" maxlength="150000" placeholder="# Title&#10;## A section&#10;Text you want to ask questions about"></textarea>
-      </details>
-      <ul id="filelist" class="filelist" aria-live="polite"></ul>
-      <p class="privacy">Your text is indexed in this server's memory for one hour, behind a private link, and is never written to disk. Do not upload anything confidential to a public demo.</p>
-      <p id="mineErr" class="err" role="alert"></p>
-      <div class="mineActions"><button id="index" class="primary" type="button" disabled>Index documents</button><button id="forget" class="ghost" type="button" hidden>Remove my documents</button></div>
-    </section>
-    <form id="form" class="ask" autocomplete="off">
-      <label for="q" class="sr">Your question</label>
-      <input id="q" name="q" type="text" maxlength="400" placeholder="e.g. Why doesn't my error handler catch 404s?" required>
-      <button id="go" type="submit">Ask</button>
-    </form>
-    <div class="chips" id="chips" aria-label="Example questions"></div>
-  </section>
 
-  <section class="result" id="result" aria-live="polite" hidden>
-    <article class="answer" id="answer"></article>
-    <div class="sources" id="sources"></div>
-  </section>
+      <section class="mine" id="panel-mine" hidden aria-label="Add your documents">
+        <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files or drop them here">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11V3M4.5 6.5 8 3l3.5 3.5M3 13h10"/></svg>
+          <strong>Drop .md or .txt files</strong><span>or choose files · up to 8 files, 150 KB total</span>
+          <input id="files" type="file" accept=".md,.mdx,.txt,text/plain,text/markdown" multiple hidden>
+        </div>
+        <details class="paste"><summary>Or paste text</summary>
+          <label class="sr" for="pasted">Pasted document text</label>
+          <textarea id="pasted" rows="6" maxlength="150000" placeholder="# Title&#10;## A section&#10;Text you want to ask questions about"></textarea>
+        </details>
+        <ul id="filelist" class="filelist" aria-live="polite"></ul>
+        <p class="privacy">Indexed in this server's memory for one hour, behind a private link, never written to disk. Don't upload anything confidential to a public demo.</p>
+        <p id="mineErr" class="err" role="alert"></p>
+        <div class="mineActions"><button id="index" class="primary" type="button" disabled>Index documents</button><button id="forget" class="ghost" type="button" hidden>Remove my documents</button></div>
+      </section>
 
-  <section class="how">
-    <h2>How it works</h2>
-    <ol>
-      <li><b>Chunk</b><span>Pages are split at headings, so an answer stays in one piece.</span></li>
-      <li><b>Retrieve</b><span>Keyword search and a local semantic index vote, then a reranker orders the top passages.</span></li>
-      <li><b>Answer</b><span>Only from those passages, with citations. Unknown words or weak matches mean a refusal.</span></li>
-    </ol>
-    <p class="note">Measured on a 50-question set written for this corpus: see the repository's <code>eval/results</code> for the tables and their limits.</p>
-  </section>
-</main>
+      <div class="thread" id="thread" aria-live="polite"></div>
+      <p class="sr" id="live" aria-live="polite"></p>
 
-<footer>
-  <p>Corpus: Express 5 documentation, © The Express Contributors, <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a>. This project is not affiliated with or endorsed by Express.</p>
-</footer>
+      <div class="dock" id="dock">
+        <form id="form" class="composer" autocomplete="off">
+          <label for="q" class="sr">Your question</label>
+          <textarea id="q" name="q" rows="1" maxlength="400" placeholder="Ask about routing, middleware, error handling…" required></textarea>
+          <div class="crow">
+            <span class="scope" id="scope">Searching Express 5 docs</span>
+            <button id="go" type="submit" aria-label="Ask"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg></button>
+          </div>
+        </form>
+        <div class="chips" id="chips" aria-label="Example questions"></div>
+      </div>
+    </main>
+
+    <footer class="statusbar">
+      <span>Hybrid retrieval: BM25 + local semantic index + reranker</span>
+      <span class="sp"></span>
+      <span id="stat">Ready</span>
+    </footer>
+  </div>
+</div>
+
+<dialog id="how" aria-labelledby="howh">
+  <h2 id="howh">How DocuMind answers</h2>
+  <ol>
+    <li><b>Chunk</b><span>Pages are split at headings, so an answer stays in one piece.</span></li>
+    <li><b>Retrieve</b><span>Keyword search and a local semantic index each vote, then a reranker orders the top passages.</span></li>
+    <li><b>Answer or refuse</b><span>Only from those passages, with citations. Unknown words or weak matches mean a refusal.</span></li>
+  </ol>
+  <p>Measured on a 50-question set written for this corpus. The tables and their limits are in the repository's <code>eval/results</code>.</p>
+  <button class="primary" id="howclose" type="button">Close</button>
+</dialog>
 <script src="/app.js" type="module"></script>
 </body>
 </html>
