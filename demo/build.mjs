@@ -72,6 +72,7 @@ const out = `<title>DocuMind</title>
 <meta name="description" content="Question answering over the Express 5 docs. Every answer cites its source passage, and questions the docs do not cover are refused. Runs entirely in your browser.">
 ${links}
 <style>${css}</style>
+${R('demo/landing.html')}
 ${body}
 <script>
 (async () => {
