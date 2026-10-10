@@ -24,7 +24,7 @@ export function chunkFixed(docs, { size = 800, overlap = 100 } = {}) {
 export function chunkSections(docs, { maxChars = 1600, overlap = 100 } = {}) {
   const chunks = [];
   for (const { file, text } of docs) {
-    const title = (text.match(/^title:\s*(.+)$/m) || [, file])[1].trim();
+    const title = (text.match(/^title:\s*(.+)$/m) || text.match(/^#\s+(.+)$/m) || [, file])[1].trim();
     const lines = text.split('\n');
     const sections = [];
     let heading = title, buf = [], inCode = false;

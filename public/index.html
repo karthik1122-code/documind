@@ -19,9 +19,28 @@
 <main>
   <section class="hero">
     <p class="eyebrow">Retrieval-augmented Q&amp;A · evaluated, not guessed</p>
-    <h1>Ask the Express 5 docs.<br><em>Get the passage, not a guess.</em></h1>
+    <h1 id="h1">Ask the Express 5 docs.<br><em>Get the passage, not a guess.</em></h1>
     <p class="lede">Every answer points to the exact paragraph it came from. If the docs don't cover your question, DocuMind says so instead of making something up.</p>
+    <p class="sr" id="live" aria-live="polite"></p>
 
+    <div class="tabs" role="tablist" aria-label="What to ask about">
+      <button class="tab on" id="tab-express" role="tab" aria-selected="true" aria-controls="panel-ask" type="button">Express 5 docs</button>
+      <button class="tab" id="tab-mine" role="tab" aria-selected="false" aria-controls="panel-mine" type="button">Your documents</button>
+    </div>
+    <section id="panel-mine" class="mine" hidden aria-label="Add your documents">
+      <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files or drop them here">
+        <strong>Drop .md or .txt files here</strong><span>or choose files. Up to 8 files and 150 KB in total.</span>
+        <input id="files" type="file" accept=".md,.mdx,.txt,text/plain,text/markdown" multiple hidden>
+      </div>
+      <details class="paste"><summary>Or paste text</summary>
+        <label class="sr" for="pasted">Pasted document text</label>
+        <textarea id="pasted" rows="6" maxlength="150000" placeholder="# Title&#10;## A section&#10;Text you want to ask questions about"></textarea>
+      </details>
+      <ul id="filelist" class="filelist" aria-live="polite"></ul>
+      <p class="privacy">Your text is indexed in this server's memory for one hour, behind a private link, and is never written to disk. Do not upload anything confidential to a public demo.</p>
+      <p id="mineErr" class="err" role="alert"></p>
+      <div class="mineActions"><button id="index" class="primary" type="button" disabled>Index documents</button><button id="forget" class="ghost" type="button" hidden>Remove my documents</button></div>
+    </section>
     <form id="form" class="ask" autocomplete="off">
       <label for="q" class="sr">Your question</label>
       <input id="q" name="q" type="text" maxlength="400" placeholder="e.g. Why doesn't my error handler catch 404s?" required>

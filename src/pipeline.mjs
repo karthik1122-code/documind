@@ -7,9 +7,11 @@ import { buildReranker } from './rerank.mjs';
 import { buildAnswerer, buildPrompt, parseLlmReply } from './answer.mjs';
 
 /** Retrieval: sections of at most 800 chars -> BM25 (stemmed) + LSA fused with RRF -> feature reranker. */
-export function createPipeline({ corpusDir, llm = null, topK = 5 } = {}) {
-  const docs = loadCorpus(corpusDir);
+export function createPipeline({ corpusDir, docs: given, llm = null, topK = 5, maxChunks = Infinity } = {}) {
+  const docs = given || loadCorpus(corpusDir);
   const chunks = chunkSections(docs, { maxChars: 800 });
+  if (!chunks.length) throw Object.assign(new Error('no readable text in these documents'), { code: 'empty' });
+  if (chunks.length > maxChunks) throw Object.assign(new Error(`these documents split into ${chunks.length} passages; the limit is ${maxChunks}`), { code: 'too_many_chunks' });
   const retriever = buildReranker(rrf([buildBm25(chunks, { stemming: true }), buildLsa(chunks, { dim: 50 })]), chunks);
   // Settings chosen on the dev half of the evaluation set (see eval/results/answer-eval.md).
   const extractive = buildAnswerer(chunks, { threshold: 0.5, oovMax: 0.15 });

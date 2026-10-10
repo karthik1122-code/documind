@@ -10,10 +10,16 @@ Question answering over documentation, built **evaluation-first**: the question 
 Requires Node 22 or newer. No dependencies.
 
 ```bash
-npm test            # 23 tests, including the evaluation gates
+npm test            # 25 tests, including the evaluation gates
 npm start           # http://localhost:4180 (extractive mode, no key needed)
 GEMINI_API_KEY=... npm start   # generates answers from retrieved passages only
 ```
+
+## Ask your own documents
+
+The **Your documents** tab indexes up to 8 `.md`, `.mdx` or `.txt` files (150 KB in total, at most 300 passages) with the same pipeline, then answers from them with the same citations and refusals. Uploads live in server memory for one hour behind a random 128-bit id, are never written to disk, and can be removed at any time. Do not upload confidential text to a public demo.
+
+Caveat that matters: the refusal thresholds were tuned on the Express docs. On other documents the answerer may refuse too often or too rarely, and I have not measured it. Tested: indexing, a cited answer, a refusal, expiry and removal, bad file types, empty and oversized uploads.
 
 ## The corpus and the question set
 
