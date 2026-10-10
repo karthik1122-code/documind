@@ -1,0 +1,13 @@
+{
+  "name": "documind",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Retrieval-augmented question answering over documentation, built eval-first.",
+  "scripts": {
+    "test": "node --test",
+    "eval": "node eval/run.mjs",
+    "eval:write": "node eval/run.mjs --write",
+    "verify:questions": "node eval/verify-questions.mjs"
+  }
+}

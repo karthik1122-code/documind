@@ -1,0 +1,271 @@
+{
+  "questions": 40,
+  "results": [
+    {
+      "name": "fixed-400",
+      "chunks": 358,
+      "n": 35,
+      "recall@1": 0.4,
+      "recall@3": 0.571,
+      "recall@5": 0.657,
+      "mrr": 0.49,
+      "contextChars3": 1158,
+      "byType": {
+        "paraphrase": {
+          "n": 11,
+          "recall@3": 0.455
+        },
+        "lookup": {
+          "n": 22,
+          "recall@3": 0.636
+        },
+        "multi-doc": {
+          "n": 2,
+          "recall@3": 0.5
+        }
+      },
+      "misses": [
+        "q06",
+        "q09",
+        "q10",
+        "q12",
+        "q13",
+        "q14",
+        "q19",
+        "q23",
+        "q25",
+        "q26",
+        "q27",
+        "q29"
+      ],
+      "unanswerableTop": [
+        {
+          "id": "q36",
+          "top": 1.82
+        },
+        {
+          "id": "q37",
+          "top": 12.11
+        },
+        {
+          "id": "q38",
+          "top": 2.88
+        },
+        {
+          "id": "q39",
+          "top": 5.21
+        },
+        {
+          "id": "q40",
+          "top": 6.81
+        }
+      ]
+    },
+    {
+      "name": "fixed-800",
+      "chunks": 175,
+      "n": 35,
+      "recall@1": 0.514,
+      "recall@3": 0.743,
+      "recall@5": 0.829,
+      "mrr": 0.64,
+      "contextChars3": 2311,
+      "byType": {
+        "paraphrase": {
+          "n": 11,
+          "recall@3": 0.636
+        },
+        "lookup": {
+          "n": 22,
+          "recall@3": 0.818
+        },
+        "multi-doc": {
+          "n": 2,
+          "recall@3": 0.5
+        }
+      },
+      "misses": [
+        "q01",
+        "q06",
+        "q14",
+        "q23",
+        "q27",
+        "q29"
+      ],
+      "unanswerableTop": [
+        {
+          "id": "q36",
+          "top": 0.96
+        },
+        {
+          "id": "q37",
+          "top": 11.35
+        },
+        {
+          "id": "q38",
+          "top": 2.01
+        },
+        {
+          "id": "q39",
+          "top": 4.11
+        },
+        {
+          "id": "q40",
+          "top": 6.55
+        }
+      ]
+    },
+    {
+      "name": "fixed-1600",
+      "chunks": 90,
+      "n": 35,
+      "recall@1": 0.629,
+      "recall@3": 0.914,
+      "recall@5": 0.943,
+      "mrr": 0.755,
+      "contextChars3": 4575,
+      "byType": {
+        "paraphrase": {
+          "n": 11,
+          "recall@3": 0.818
+        },
+        "lookup": {
+          "n": 22,
+          "recall@3": 0.955
+        },
+        "multi-doc": {
+          "n": 2,
+          "recall@3": 1
+        }
+      },
+      "misses": [
+        "q01",
+        "q23"
+      ],
+      "unanswerableTop": [
+        {
+          "id": "q36",
+          "top": 0.42
+        },
+        {
+          "id": "q37",
+          "top": 9.12
+        },
+        {
+          "id": "q38",
+          "top": 1.44
+        },
+        {
+          "id": "q39",
+          "top": 2.94
+        },
+        {
+          "id": "q40",
+          "top": 8.83
+        }
+      ]
+    },
+    {
+      "name": "sections-1600",
+      "chunks": 114,
+      "n": 35,
+      "recall@1": 0.686,
+      "recall@3": 0.8,
+      "recall@5": 0.943,
+      "mrr": 0.776,
+      "contextChars3": 3494,
+      "byType": {
+        "paraphrase": {
+          "n": 11,
+          "recall@3": 0.636
+        },
+        "lookup": {
+          "n": 22,
+          "recall@3": 0.864
+        },
+        "multi-doc": {
+          "n": 2,
+          "recall@3": 1
+        }
+      },
+      "misses": [
+        "q02",
+        "q23"
+      ],
+      "unanswerableTop": [
+        {
+          "id": "q36",
+          "top": 0.78
+        },
+        {
+          "id": "q37",
+          "top": 9.94
+        },
+        {
+          "id": "q38",
+          "top": 1.64
+        },
+        {
+          "id": "q39",
+          "top": 3.36
+        },
+        {
+          "id": "q40",
+          "top": 8.1
+        }
+      ]
+    },
+    {
+      "name": "sections-800",
+      "chunks": 198,
+      "n": 35,
+      "recall@1": 0.657,
+      "recall@3": 0.8,
+      "recall@5": 0.886,
+      "mrr": 0.739,
+      "contextChars3": 2229,
+      "byType": {
+        "paraphrase": {
+          "n": 11,
+          "recall@3": 0.727
+        },
+        "lookup": {
+          "n": 22,
+          "recall@3": 0.864
+        },
+        "multi-doc": {
+          "n": 2,
+          "recall@3": 0.5
+        }
+      },
+      "misses": [
+        "q01",
+        "q06",
+        "q14",
+        "q23"
+      ],
+      "unanswerableTop": [
+        {
+          "id": "q36",
+          "top": 1.03
+        },
+        {
+          "id": "q37",
+          "top": 11.82
+        },
+        {
+          "id": "q38",
+          "top": 1.92
+        },
+        {
+          "id": "q39",
+          "top": 4.06
+        },
+        {
+          "id": "q40",
+          "top": 6.52
+        }
+      ]
+    }
+  ]
+}
