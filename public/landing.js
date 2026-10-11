@@ -113,4 +113,4 @@ const root = document.documentElement; const $ = id => document.getElementById(i
     for (let k = 0; ; k = (k + 1) % QS.length) { await play(QS[k], results[k]); if (still) break; await wait(5200); }
   })();
 
-kinetic('h1, h2', { mode: 'rise' });
+kinetic({ fx: { h1: 'blur', h2: 'rise' }, magnetic: '.lp-btn.lg' });

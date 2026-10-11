@@ -59,7 +59,7 @@
 
   <section class="lp-sec" id="how"><div class="lp-wrap">
     <h2>Small enough to read. Measured before it was trusted.</h2>
-    <p class="lede">Each stage was kept or dropped because a number said so.</p>
+    <p class="lede" data-fill>Each stage was kept or dropped because a number said so.</p>
     <div class="lp-3">
       <div><h3>Chunk</h3><p>Pages are split at headings. Each passage keeps its page title and heading, so a bare paragraph still has context.</p><div class="big" id="nChunks">198</div><div class="cap">passages from <span id="nDocs">16</span> pages</div></div>
       <div><h3>Retrieve</h3><p>Keyword search and a local semantic index each vote. A reranker orders the top five.</p><div class="big">71.4%</div><div class="cap">right passage ranked first</div></div>
@@ -69,7 +69,7 @@
 
   <section class="lp-sec" id="evidence"><div class="lp-wrap">
     <h2>The numbers, including the one I'd rather hide.</h2>
-    <p class="lede">Fifty questions written for this corpus: 35 the docs answer, 15 they don't.</p>
+    <p class="lede" data-fill>Fifty questions written for this corpus: 35 the docs answer, 15 they don't.</p>
     <div class="lp-ev" id="lpEv">
       <div><h3>Right passage ranked first</h3><p class="s">retrieval recall@1 · 35 answerable questions</p>
         <div class="lp-row"><span>Semantic vectors</span><div class="tr"><div class="fl" data-w="40"></div></div><b>40.0%</b></div>
@@ -89,7 +89,7 @@
 
   <section class="lp-sec" id="errata"><div class="lp-wrap">
     <h2>Errata: what this does not claim.</h2>
-    <p class="lede">Read these before trusting any number above.</p>
+    <p class="lede" data-fill>Read these before trusting any number above.</p>
     <ol class="lp-err">
       <li><span class="d">1</span><span><b>Small benchmark.</b> The questions were written by the author for one corpus. With 35 answerable questions, one question is 2.9 percentage points.</span></li>
       <li><span class="d">2</span><span><b>Paraphrases stay hard.</b> Two questions are missed by every local method because they share almost no words with the answer. That is the case for a neural embedding model.</span></li>
