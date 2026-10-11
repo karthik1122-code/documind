@@ -14,9 +14,10 @@ const root = document.documentElement; const $ = id => document.getElementById(i
   const QS = ['How do I make part of a route path optional?', 'How do I protect against CSRF attacks?'];
   const nice = f => f.replace(/__/g, ' / ').replace('.mdx', '');
   const wait = ms => new Promise(r => setTimeout(r, ms));
+  async function ask(q) { for (let n = 0; n < 4; n++) { const res = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: q }) }); if (res.status !== 429) return res; await wait((Number(res.headers.get('retry-after')) || 3) * 1000); } throw new Error('busy'); }
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   async function run(q) {
-    const t0 = performance.now(); const res = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: q }) });
+    const t0 = performance.now(); const res = await ask(q);
     const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '', sources = [], answer = null;
     for (;;) { const { value, done } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i; while ((i = buf.indexOf('\n\n')) >= 0) { const l = buf.slice(0, i).trim(); buf = buf.slice(i + 2); if (!l.startsWith('data:')) continue; const ev = JSON.parse(l.slice(5)); if (ev.type === 'sources') sources = ev.sources; else if (ev.type === 'answer') answer = ev; } }
     const src = (answer && !answer.abstained && sources.find(s => s.id === answer.citations[0].id)) || sources[0];
@@ -58,7 +59,7 @@ const root = document.documentElement; const $ = id => document.getElementById(i
 
   /* marquee: every example question, run through the real pipeline */
   const EX = ['How do I make part of a route path optional?', "How do I turn on all of Express's internal debug logs?", 'Which Node.js version can run .ts files directly?', 'What function must a template engine export so res.render can use it?', 'How do I store user sessions in Redis?', 'How do I protect against CSRF attacks?', 'What is the capital of Australia?'];
-  async function probe(q) { const res = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: q }) }); const t = await res.text(); const ev = t.split('\n\n').filter(l => l.startsWith('data:')).map(l => JSON.parse(l.slice(5))); return { sources: ev.find(e => e.type === 'sources').sources, answer: ev.find(e => e.type === 'answer') }; }
+  async function probe(q) { const res = await ask(q); const t = await res.text(); const ev = t.split('\n\n').filter(l => l.startsWith('data:')).map(l => JSON.parse(l.slice(5))); return { sources: ev.find(e => e.type === 'sources').sources, answer: ev.find(e => e.type === 'answer') }; }
   async function marquee() {
     const rs = await Promise.all(EX.map(probe)); const t = $('mq');
     const one = () => rs.map((r, i) => { const d = document.createElement('div'); d.className = 'lp-mq-i ' + (r.answer.abstained ? 'no' : 'ok'); const sp = document.createElement('span'); sp.textContent = EX[i]; const sm = document.createElement('small'); sm.textContent = r.answer.abstained ? 'not in the docs' : 'answered · ' + nice(r.answer.citations[0].file); d.append(sp, sm); return d; });
@@ -107,6 +108,6 @@ const root = document.documentElement; const $ = id => document.getElementById(i
 
     fetch('/api/health').then(r => r.json()).then(h => { $('nChunks').textContent = h.chunks; $('nDocs').textContent = h.docs; }).catch(() => {});
     marquee().catch(() => {}); story().catch(() => {});
-    let results; try { results = await Promise.all(QS.map(run)); } catch { return; }
+    let results; try { results = []; for (const q of QS) results.push(await run(q)); } catch { $('dm').textContent = 'The live demo is busy. Open the app to ask your own question.'; $('dm').classList.add('on'); return; }
     for (let k = 0; ; k = (k + 1) % QS.length) { await play(QS[k], results[k]); if (still) break; await wait(5200); }
   })();
