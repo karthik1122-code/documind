@@ -1,3 +1,4 @@
+import { kinetic } from '/kinetic.js';
 const root = document.documentElement; const $ = id => document.getElementById(id);
 
 
@@ -111,3 +112,5 @@ const root = document.documentElement; const $ = id => document.getElementById(i
     let results; try { results = []; for (const q of QS) results.push(await run(q)); } catch { $('dm').textContent = 'The live demo is busy. Open the app to ask your own question.'; $('dm').classList.add('on'); return; }
     for (let k = 0; ; k = (k + 1) % QS.length) { await play(QS[k], results[k]); if (still) break; await wait(5200); }
   })();
+
+kinetic('h1, h2', { mode: 'rise' });

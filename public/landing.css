@@ -126,3 +126,12 @@ html:has(body.landing),body.landing{height:auto}
 .lp-steps li{position:relative}
 .lp-steps li::before{content:'';position:absolute;left:0;top:-1px;height:2px;width:100%;background:var(--marker);transform:scaleX(0);transform-origin:left;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
 .lp-steps li.on::before{transform:scaleX(1)}
+
+/* kinetic type: each letter rises through its word's mask; the pointer lifts letters near it */
+.kin .kin-h .kw{display:inline-block;overflow:hidden;padding:.08em 0 .14em;margin:-.08em 0 -.14em;vertical-align:top}
+.kin .kin-h .kl{display:inline-block;transform:translateY(112%) rotate(6deg);transform-origin:0 100%;opacity:0;will-change:transform}
+.kin .kin-h.kin-in .kl{transform:translateY(calc(var(--w,0)*-.12em)) rotate(calc(var(--w,0)*-3deg));opacity:1;transition:transform .7s cubic-bezier(.2,.9,.2,1) calc(var(--i)*22ms),opacity .3s ease calc(var(--i)*22ms)}
+.kin .kin-h.kin-in.kin-done .kl{transition:transform .25s ease-out;transition-delay:0s}
+.kin .kin-h[data-kin=scramble] .kl{transform:none;opacity:1;transition:none}
+.kin .kin-h[data-kin=scramble]:not(.kin-in) .kl{opacity:0}
+.kin .kin-h[data-kin=scramble].kin-in .kl{transition:opacity .01s}
