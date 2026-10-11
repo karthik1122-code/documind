@@ -1,4 +1,4 @@
-import { kinetic } from '/kinetic.js';
+import { kinetic, progress, countUp } from '/kinetic.js';
 const root = document.documentElement; const $ = id => document.getElementById(id);
 
 
@@ -114,3 +114,4 @@ const root = document.documentElement; const $ = id => document.getElementById(i
   })();
 
 kinetic({ fx: { h1: 'blur', h2: 'rise' }, magnetic: '.lp-btn.lg' });
+progress('var(--marker)'); countUp('.lp-3 .big:not(#nChunks), .lp-st b');
