@@ -7,7 +7,7 @@
  */
 const BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
-export function createGemini({ apiKey = process.env.GEMINI_API_KEY, embedModel = process.env.GEMINI_EMBED_MODEL || 'gemini-embedding-001', model = process.env.GEMINI_MODEL || 'gemini-2.5-flash', fetchImpl = fetch, dims = 768 } = {}) {
+export function createGemini({ apiKey = process.env.GEMINI_API_KEY, embedModel = process.env.GEMINI_EMBED_MODEL || 'gemini-embedding-001', model = process.env.GEMINI_MODEL || 'gemini-3.8-flash', fetchImpl = fetch, dims = 768 } = {}) {
   if (!apiKey) throw new Error('GEMINI_API_KEY is not set');
   const headers = { 'content-type': 'application/json', 'x-goog-api-key': apiKey };
   const post = async (path, body) => {
