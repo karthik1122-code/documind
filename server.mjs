@@ -27,7 +27,13 @@ const headers = {
 const RATE_LIMIT = Number(process.env.RATE_LIMIT || 20);
 const hits = new Map();
 const clientIp = req => ((process.env.VERCEL || process.env.TRUST_PROXY) && String(req.headers['x-forwarded-for'] || '').split(',')[0].trim()) || req.socket.remoteAddress || 'unknown';
-const limited = ip => { const now = Date.now(); const list = (hits.get(ip) || []).filter(t => now - t < 60_000); list.push(now); hits.set(ip, list); return list.length > RATE_LIMIT; };
+const limited = ip => {
+  const now = Date.now();
+  // Forget visitors with no request in the last minute, so the map cannot grow without bound.
+  if (hits.size > 5000) for (const [k, v] of hits) if (now - v[v.length - 1] >= 60_000) hits.delete(k);
+  const list = (hits.get(ip) || []).filter(t => now - t < 60_000); list.push(now); hits.set(ip, list);
+  return list.length > RATE_LIMIT;
+};
 
 const json = (res, status, body) => { res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers }); res.end(JSON.stringify(body)); };
 const readBody = (req, max = MAX_BODY) => new Promise((resolve, reject) => {
@@ -58,7 +64,7 @@ const checkFiles = files => {
 export const handler = async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   try {
-    if (req.method === 'GET' && url.pathname === '/api/health') return json(res, 200, { status: 'ok', mode: pipeline.mode, docs: pipeline.docCount, chunks: pipeline.chunkCount, files: pipeline.docs });
+    if (req.method === 'GET' && url.pathname === '/api/health') return json(res, 200, { status: 'ok', mode: pipeline.mode, fallback: llm ? 'extractive' : null, docs: pipeline.docCount, chunks: pipeline.chunkCount, files: pipeline.docs });
     if (req.method === 'POST' && url.pathname === '/api/collections') {
       if (limited(clientIp(req))) return json(res, 429, { error: 'rate_limited' });
       if (building) return json(res, 429, { error: 'busy', message: 'Another set of documents is being indexed. Try again in a few seconds.' });

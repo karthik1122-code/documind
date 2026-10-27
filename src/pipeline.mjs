@@ -7,7 +7,7 @@ import { buildReranker } from './rerank.mjs';
 import { buildAnswerer, buildPrompt, parseLlmReply } from './answer.mjs';
 
 /** Retrieval: sections of at most 800 chars -> BM25 (stemmed) + LSA fused with RRF -> feature reranker. */
-export function createPipeline({ corpusDir, docs: given, llm = null, topK = 5, maxChunks = Infinity } = {}) {
+export function createPipeline({ corpusDir, docs: given, llm = null, topK = 5, maxChunks = Infinity, llmTimeoutMs = Number(process.env.LLM_TIMEOUT_MS || 25_000) } = {}) {
   const docs = given || loadCorpus(corpusDir);
   const chunks = chunkSections(docs, { maxChars: 800 });
   if (!chunks.length) throw Object.assign(new Error('no readable text in these documents'), { code: 'empty' });
@@ -36,9 +36,21 @@ export function createPipeline({ corpusDir, docs: given, llm = null, topK = 5, m
         return;
       }
       const { system, user, passages } = buildPrompt(question, results);
+      // If the model is busy, slow or fails mid-answer, fall back to the extractive answer instead of an error:
+      // the user still gets a cited sentence copied from the source, or a refusal.
+      const timeout = new AbortController();
+      const timer = setTimeout(() => timeout.abort(new Error('timeout')), llmTimeoutMs);
       let text = '';
-      for await (const piece of llm.stream({ system, user })) { text += piece; yield { type: 'delta', text: piece }; }
-      yield { type: 'answer', ...parseLlmReply(text, passages), mode: llm.name };
+      try {
+        for await (const piece of llm.stream({ system, user, signal: timeout.signal })) { text += piece; yield { type: 'delta', text: piece }; }
+        yield { type: 'answer', ...parseLlmReply(text, passages), mode: llm.name };
+      } catch (error) {
+        console.warn(`LLM failed (${error.status || error.message}); using the extractive answer.`);
+        const why = timeout.signal.aborted ? 'The AI model took too long' : text ? 'The AI model stopped mid-answer' : 'The AI model is unavailable right now';
+        yield { type: 'answer', ...extractive.answer(question, results), mode: 'extractive', note: `${why}, so this answer is copied from the source instead.` };
+      } finally {
+        clearTimeout(timer);
+      }
     },
   };
 }

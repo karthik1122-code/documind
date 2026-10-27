@@ -13,6 +13,10 @@
     "eval:ablation": "node eval/ablation.mjs",
     "eval:answer": "node eval/answer-eval.mjs",
     "eval:gemini": "node eval/run-gemini.mjs --write",
-    "eval:llm": "node eval/answer-eval-llm.mjs --write"
+    "eval:llm": "node eval/answer-eval-llm.mjs --write",
+    "test:e2e": "node --test e2e/*.e2e.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.0"
   }
 }

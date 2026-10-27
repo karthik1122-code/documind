@@ -7,10 +7,11 @@ Question answering over documentation, built **evaluation-first**: the question 
 
 ## Quick start
 
-Requires Node 22 or newer. No dependencies.
+Requires Node 22 or newer. No runtime dependencies (Playwright is a dev dependency for the browser test only).
 
 ```bash
-npm test            # 25 tests, including the evaluation gates
+npm test            # 35 tests, including the evaluation gates
+npm run test:e2e    # browser journey: ask, refusal, paste your own document, phone layout
 npm start           # http://localhost:4180 (extractive mode, no key needed)
 GEMINI_API_KEY=... npm start   # generates answers from retrieved passages only
 ```
@@ -19,7 +20,7 @@ GEMINI_API_KEY=... npm start   # generates answers from retrieved passages only
 
 The **Your documents** tab indexes up to 8 `.md`, `.mdx` or `.txt` files (150 KB in total, at most 300 passages) with the same pipeline, then answers from them with the same citations and refusals. Uploads live in server memory for one hour behind a random 128-bit id, are never written to disk, and can be removed at any time. Do not upload confidential text to a public demo.
 
-Caveat that matters: the refusal thresholds were tuned on the Express docs. On other documents the answerer may refuse too often or too rarely, and I have not measured it. Tested: indexing, a cited answer, a refusal, expiry and removal, bad file types, empty and oversized uploads.
+Caveat that matters: the refusal thresholds were tuned on the Express docs. On other documents the answerer may refuse too often or too rarely, and I have not measured it. One fix came from testing this tab: everyday question words such as "many" or "get" used to count as unknown terms, so a small document refused plain questions like "How many days of annual leave do employees get?". They are now ignored by the unknown-word check; the Express numbers below are unchanged by this. Tested: indexing, a cited answer, a refusal, expiry and removal, bad file types, empty and oversized uploads.
 
 ## The corpus and the question set
 
@@ -111,7 +112,8 @@ question
 ```
 
 - **Prompt-injection posture:** retrieved passages are wrapped in delimiters, any delimiter text inside a passage is neutralised, the system prompt says passages are data and never instructions, and replies without a citation to a supplied passage are discarded. These are unit-tested. Whether a given model resists is what `eval:llm` measures.
-- **Server:** request bodies are capped, questions are limited to 400 characters, an in-memory limiter allows 20 questions a minute per address, only `public/` is served, and a strict content security policy is set.
+- **When the model fails:** the Gemini adapter retries 503 and 429 answers with backoff, then tries `GEMINI_FALLBACK_MODEL` if set. A call that takes longer than `LLM_TIMEOUT_MS` (default 25 s) is cut off. If the model still fails, or stops mid-answer, the user gets the extractive answer, a sentence copied from the source with its citation (or a refusal), with a note saying why, never a bare error. Covered by unit tests with a mocked model.
+- **Server:** request bodies are capped, questions are limited to 400 characters, an in-memory limiter allows 20 questions a minute per address (behind Render's proxy set `TRUST_PROXY=true`, which `render.yaml` does), only `public/` is served, and a strict content security policy is set.
 
 ## Layout
 
@@ -125,7 +127,15 @@ server.mjs         streaming API (server-sent events) + static files
 
 ## Deploying
 
-`render.yaml` and a `Dockerfile` are included (no runtime dependencies). They have not been deployed or built yet. `GEMINI_API_KEY` is optional and must be set in the host's environment, never committed.
+The live demo runs on Vercel (below). `render.yaml` and a `Dockerfile` are included as an alternative and have not been deployed. `GEMINI_API_KEY` is optional and must be set in the host's environment, never committed.
+
+| Variable | Needed | Purpose |
+| --- | --- | --- |
+| `GEMINI_API_KEY` | no | Turns on model-written answers; without it answers are extractive |
+| `GEMINI_MODEL` / `GEMINI_FALLBACK_MODEL` | no | Main model (default `gemini-3.8-flash`) and the one tried when it is overloaded |
+| `LLM_TIMEOUT_MS` | no | Cut-off for one model answer (default 25000) |
+| `RATE_LIMIT` | no | Questions per minute per address (default 20) |
+| `TRUST_PROXY` | behind a proxy | Read the visitor address from `X-Forwarded-For` |
 
 ## Roadmap
 
@@ -135,7 +145,7 @@ server.mjs         streaming API (server-sent events) + static files
 - [x] Streaming chat UI with citations
 - [ ] Neural embeddings (needs a model key): `npm run eval:gemini`
 - [ ] Model-generated answers and injection results: `npm run eval:llm`
-- [ ] Deploy
+- [x] Deploy (Vercel)
 
 ## Deploy (Vercel)
 

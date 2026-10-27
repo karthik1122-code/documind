@@ -14,3 +14,9 @@ jobs:
           node-version: 22
 
       - run: npm test
+      - name: Retrieval evaluation
+        run: npm run eval
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Browser journey
+        run: npm run test:e2e

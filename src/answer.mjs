@@ -16,6 +16,10 @@ export function splitSentences(text) {
   return out;
 }
 
+// Everyday question words that say nothing about the topic. A small document set may never contain them,
+// and counting them as unknown made DocuMind refuse plain questions such as "How many days of leave do I get?".
+const QUESTION_WORDS = new Set('many much get gets got need needs want wants way ways should could would please tell know possible someone anyone anything something thing things happen happens use used using work works'.split(' '));
+
 export function buildAnswerer(chunks, { threshold = 0.4, oovMax = 0.25, maxSentences = 2 } = {}) {
   const toks = text => tokenize(text, { stemming: true });
   const df = new Map();
@@ -27,7 +31,7 @@ export function buildAnswerer(chunks, { threshold = 0.4, oovMax = 0.25, maxSente
     setThreshold(t, o = oovMax) { threshold = t; oovMax = o; },
     /** Share of the question's IDF mass made of words that never occur anywhere in the corpus. */
     oov(question) {
-      const q = [...new Set(toks(question))];
+      const q = [...new Set(toks(question))].filter(t => df.has(t) || !QUESTION_WORDS.has(t));
       const total = q.reduce((s, t) => s + (df.has(t) ? idf(t) : 3), 0) || 1;
       return q.filter(t => !df.has(t)).reduce((s) => s + 3, 0) / total;
     },
