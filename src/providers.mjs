@@ -7,14 +7,45 @@
  */
 const BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
-export function createGemini({ apiKey = process.env.GEMINI_API_KEY, embedModel = process.env.GEMINI_EMBED_MODEL || 'gemini-embedding-001', model = process.env.GEMINI_MODEL || 'gemini-3.8-flash', fetchImpl = fetch, dims = 768 } = {}) {
+// Overloaded (503), rate limited (429) and other server errors are worth retrying; a bad request is not.
+const RETRYABLE = status => status === 429 || status >= 500;
+
+export function createGemini({
+  apiKey = process.env.GEMINI_API_KEY,
+  embedModel = process.env.GEMINI_EMBED_MODEL || 'gemini-embedding-001',
+  model = process.env.GEMINI_MODEL || 'gemini-3.8-flash',
+  fallbackModel = process.env.GEMINI_FALLBACK_MODEL || '',
+  attempts = 3,
+  retryDelayMs = 600,
+  fetchImpl = fetch,
+  dims = 768,
+} = {}) {
   if (!apiKey) throw new Error('GEMINI_API_KEY is not set');
   const headers = { 'content-type': 'application/json', 'x-goog-api-key': apiKey };
-  const post = async (path, body) => {
-    const res = await fetchImpl(`${BASE}/${path}`, { method: 'POST', headers, body: JSON.stringify(body) });
-    if (!res.ok) throw new Error(`Gemini ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  const post = async (path, body, signal) => {
+    const res = await fetchImpl(`${BASE}/${path}`, { method: 'POST', headers, body: JSON.stringify(body), signal });
+    if (!res.ok) throw Object.assign(new Error(`Gemini ${res.status}: ${(await res.text()).slice(0, 300)}`), { status: res.status });
     return res;
   };
+  const sleep = (ms, signal) => new Promise((resolve, reject) => {
+    const t = setTimeout(resolve, ms);
+    signal?.addEventListener('abort', () => { clearTimeout(t); reject(signal.reason || new Error('aborted')); }, { once: true });
+  });
+  /** Tries the main model a few times with backoff, then the fallback model, before giving up. */
+  const withRetry = async (call, signal) => {
+    let last;
+    for (const m of [model, fallbackModel].filter(Boolean)) {
+      for (let i = 0; i < attempts; i += 1) {
+        try { return await call(m); } catch (e) {
+          last = e;
+          if (signal?.aborted || !RETRYABLE(e.status)) throw e;
+          if (i < attempts - 1) await sleep(retryDelayMs * 2 ** i, signal);
+        }
+      }
+    }
+    throw last;
+  };
+  const body = (system, user) => ({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }], generationConfig: { temperature: 0 } });
   return {
     name: `gemini:${model}`,
     /** Embeds texts in batches of up to 100. task is RETRIEVAL_DOCUMENT or RETRIEVAL_QUERY. */
@@ -28,14 +59,14 @@ export function createGemini({ apiKey = process.env.GEMINI_API_KEY, embedModel =
       }
       return out;
     },
-    async generate({ system, user }) {
-      const res = await post(`models/${model}:generateContent`, { systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }], generationConfig: { temperature: 0 } });
+    async generate({ system, user, signal }) {
+      const res = await withRetry(m => post(`models/${m}:generateContent`, body(system, user), signal), signal);
       const json = await res.json();
       return (json.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
     },
-    /** Yields text fragments as they arrive (server-sent events). */
-    async *stream({ system, user }) {
-      const res = await post(`models/${model}:streamGenerateContent?alt=sse`, { systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }], generationConfig: { temperature: 0 } });
+    /** Yields text fragments as they arrive (server-sent events). Retries happen only before the first fragment. */
+    async *stream({ system, user, signal }) {
+      const res = await withRetry(m => post(`models/${m}:streamGenerateContent?alt=sse`, body(system, user), signal), signal);
       const decoder = new TextDecoder();
       let buffer = '';
       for await (const part of res.body) {

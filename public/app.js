@@ -135,7 +135,7 @@ function renderAnswer(t) {
   if (ans.abstained) {
     a.className = 'ans refused'; a.replaceChildren();
     const big = document.createElement('span'); big.className = 'big'; big.textContent = 'Not in the docs.';
-    const sm = document.createElement('span'); sm.className = 'sm'; sm.textContent = `${REASONS[ans.reason] || ''} The closest passages are below, in case they help.`;
+    const sm = document.createElement('span'); sm.className = 'sm'; sm.textContent = `${ans.note ? ans.note + ' ' : ''}${REASONS[ans.reason] || ''}${t.sources.length ? ' The closest passages are below, in case they help.' : ' No passage in these docs shares a word with the question.'}`;
     a.append(big, sm);
   } else {
     a.className = 'ans'; a.replaceChildren();
@@ -143,7 +143,7 @@ function renderAnswer(t) {
     const order = t.sources.map(s => s.id);
     (ans.citations || []).forEach(c => { const n = order.indexOf(c.id); if (n < 0) return; const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'cite'; bt.textContent = n + 1; bt.setAttribute('aria-label', `Show source ${n + 1}`); bt.onclick = () => selectSource(t, n, true); a.append(bt); });
     const how = document.createElement('p'); how.className = 'how';
-    const mode = document.createElement('span'); mode.textContent = ans.mode === 'extractive' ? 'Copied from the source, nothing generated' : 'Written from the passages only';
+    const mode = document.createElement('span'); mode.textContent = ans.note || (ans.mode === 'extractive' ? 'Copied from the source, nothing generated' : 'Written from the passages only');
     const cp = document.createElement('button'); cp.type = 'button'; cp.textContent = 'Copy answer';
     cp.onclick = async () => { try { await navigator.clipboard.writeText(ans.text); cp.textContent = 'Copied'; } catch { cp.textContent = 'Copy blocked'; } setTimeout(() => { cp.textContent = 'Copy answer'; }, 1500); };
     how.append(mode, cp); a.append(how);

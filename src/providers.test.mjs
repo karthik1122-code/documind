@@ -36,7 +36,7 @@ test('gemini: stream yields fragments from server-sent events split across netwo
 });
 
 test('gemini: errors surface the status and do not echo the key', async () => {
-  const g = createGemini({ apiKey: 'secret-key', fetchImpl: async () => res({ error: 'bad' }, false, 429) });
+  const g = createGemini({ apiKey: 'secret-key', retryDelayMs: 0, fetchImpl: async () => res({ error: 'bad' }, false, 429) });
   await assert.rejects(g.generate({ system: 's', user: 'u' }), err => /429/.test(err.message) && !err.message.includes('secret-key'));
 });
 
@@ -84,4 +84,22 @@ test('answerWithLlm wires prompt, provider and parser together', async () => {
   const out = await answerWithLlm('Q?', results, llm);
   assert.equal(out.abstained, false);
   assert.equal(out.citations[0].id, 'c1');
+});
+
+test('gemini: retries an overloaded model, then tries the fallback model', async () => {
+  const enc = new TextEncoder();
+  const ok = { ok: true, status: 200, body: (async function* () { yield enc.encode('data: {"candidates":[{"content":{"parts":[{"text":"Hi"}]}}]}\n\n'); })() };
+  const seen = [];
+  const fetchImpl = async url => { seen.push(url.match(/models\/([^:]+)/)[1]); return seen.length <= 3 ? res({ error: 'busy' }, false, 503) : ok; };
+  const g = createGemini({ apiKey: 'k', model: 'main', fallbackModel: 'backup', retryDelayMs: 0, fetchImpl });
+  const got = []; for await (const t of g.stream({ system: 's', user: 'u' })) got.push(t);
+  assert.deepEqual(got, ['Hi']);
+  assert.deepEqual(seen, ['main', 'main', 'main', 'backup']);
+});
+
+test('gemini: a bad request is not retried', async () => {
+  let calls = 0;
+  const g = createGemini({ apiKey: 'k', retryDelayMs: 0, fetchImpl: async () => { calls += 1; return res({ error: 'bad' }, false, 400); } });
+  await assert.rejects(g.generate({ system: 's', user: 'u' }), /400/);
+  assert.equal(calls, 1);
 });
