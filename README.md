@@ -118,12 +118,44 @@ question
 ## Layout
 
 ```
-corpus/            the 16 Express 5 pages + licence
-eval/              questions, verification, retrieval + answer evaluations, results/
-src/               chunk, bm25, stem, lsa, hashvec, hybrid, rerank, answer, providers, pipeline
-public/            the chat UI
-server.mjs         streaming API (server-sent events) + static files
+server.mjs                    Entry: builds the pipeline over corpus/, exports the request handler, listens locally
+src/                          The RAG pipeline, one file per step (each tested on its own)
+  pipeline.mjs                Connects the steps: chunk -> retrieve -> answer (+ fallback when the model fails)
+  chunk.mjs                   Split documents at headings (800 chars, 100 overlap, "Title > Heading" prefix)
+  bm25.mjs, stem.mjs          Keyword search with stemming
+  lsa.mjs                     Local semantic index (latent semantic analysis)
+  hybrid.mjs                  Reciprocal rank fusion of the two searches
+  rerank.mjs                  Feature reranker over the top candidates
+  answer.mjs                  Prompt, citation check, NOT_IN_DOCS refusal, extractive answer
+  providers.mjs               Gemini client: streaming, retries with backoff, fallback model
+  hashvec.mjs                 Hashed n-gram baseline (evaluated, not used by the pipeline)
+  corpus.mjs, metrics.mjs     Load documents; recall@k and MRR
+  http/                       The web layer
+    handler.mjs               Tries each route in turn, then 404; one place for 500s
+    respond.mjs               json(), body limits, client address, rate limiter
+    collections.mjs           Uploaded documents: validation, in-memory index per collection, 1-hour expiry
+    routes/
+      ask.routes.mjs          POST /api/ask (server-sent events)
+      collections.routes.mjs  POST /api/collections, DELETE /api/collections/:id
+      info.routes.mjs         GET /api/health, GET /api/doc
+      static.routes.mjs       Files from public/ only
+api/                          Vercel functions; each re-exports the handler from server.mjs
+corpus/                       The 16 Express 5 pages + licence
+eval/                         Questions, verification, retrieval + answer evaluations, results/
+public/                       Landing page and chat UI
+e2e/                          Browser tests (Playwright)
 ```
+
+### Where to change things
+
+| You want to... | Change |
+| --- | --- |
+| Chunk size or splitting | `src/chunk.mjs` and the `maxChars` in `src/pipeline.mjs`, then `npm run eval` |
+| Search quality | `src/bm25.mjs`, `src/lsa.mjs`, `src/hybrid.mjs`, `src/rerank.mjs`, then `npm run eval:ablation` |
+| The prompt or refusal rules | `src/answer.mjs`, then `npm run eval:answer` |
+| Model, retries or fallback | `src/providers.mjs` (`GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`) |
+| Upload limits | `UPLOAD` in `src/http/collections.mjs` |
+| Add an API endpoint | A file in `src/http/routes/`, listed in `src/http/handler.mjs` |
 
 ## Deploying
 

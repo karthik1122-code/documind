@@ -13,7 +13,7 @@ DocuMind answers questions about the Express 5 docs and shows which paragraph th
 3. **Chunking** (`src/chunk.mjs`): split at markdown headings, cap at 800 characters, prefix each chunk with page title and heading. At equal context cost this beat fixed-size windows.
 4. **Retrieval** (`src/bm25.mjs`, `lsa.mjs`, `hybrid.mjs`, `rerank.mjs`): BM25 with a light stemmer, plus LSA (a small semantic index learned from the chunks), combined with reciprocal rank fusion, then reordered by a feature reranker.
 5. **Answering** (`src/answer.mjs`): by default it copies the best-matching sentence. It refuses if the question uses words that never appear in the docs, or if no sentence covers enough of the question. With a model key, a model answers from the passages only, with `[n]` citations.
-6. **Serving** (`server.mjs`, `public/`): a streaming API (server-sent events) and a chat UI that shows the passages, highlights the cited sentence, and shows "not covered by these docs" for refusals.
+6. **Serving** (`server.mjs`, `src/http/`, `public/`): a streaming API (server-sent events) and a chat UI that shows the passages, highlights the cited sentence, and shows "not covered by these docs" for refusals.
 
 ## Decisions and why
 
