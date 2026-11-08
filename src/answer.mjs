@@ -6,13 +6,26 @@ import { norm } from './corpus.mjs';
  * and abstain when even the best one covers too little. No generation, so nothing can be invented.
  */
 export function splitSentences(text) {
-  const out = [];
-  let inCode = false;
-  for (const line of text.split('\n')) {
-    if (/^\s*```/.test(line)) { inCode = !inCode; continue; }
-    if (inCode || /^\s*[|<]/.test(line) || /^\s*$/.test(line) || /^(title|description):/.test(line) || /^---$/.test(line.trim())) continue;
-    for (const s of line.split(/(?<=[.!?:])\s+(?=[A-Z`*_\[])/)) { const t = s.trim(); if (t.length > 20) out.push(t); }
+  // Docs wrap long sentences across several lines, so rebuild whole paragraphs first. Splitting line by line
+  // produced half-sentences that were then glued together into an answer.
+  const paragraphs = [];
+  let inCode = false, buf = [];
+  const flush = () => { if (buf.length) paragraphs.push(buf.join(' ')); buf = []; };
+  for (const raw of text.split('\n')) {
+    const line = raw.trim();
+    if (/^```/.test(line)) { flush(); inCode = !inCode; continue; }
+    if (inCode) continue;
+    // Blank lines, tables, JSX/HTML tags, front matter, headings and the "Title > Heading" prefix end a paragraph
+    // and are never answers on their own.
+    if (!line || /^[|<]/.test(line) || /^(title|description):/.test(line) || line === '---' || /^#{1,6}\s/.test(line) || / > /.test(line) && !/[.!?]$/.test(line)) { flush(); continue; }
+    // A passage can start in the middle of a code block (after its opening fence), so also skip lines that look like code.
+    if (/[;{}]$|=>|^(import|export|const|let|var|function)\s|^(app|router|res|req)\.\w+\(|^[})]/.test(line)) { flush(); continue; }
+    if (/^([-*+]|\d+[.)])\s/.test(line)) flush(); // a list item starts its own paragraph
+    buf.push(line);
   }
+  flush();
+  const out = [];
+  for (const para of paragraphs) for (const s of para.split(/(?<=[.!?:])\s+(?=[A-Z`*_\[])/)) { const t = s.trim(); if (t.length > 20) out.push(t); }
   return out;
 }
 
@@ -22,18 +35,26 @@ const QUESTION_WORDS = new Set('many much get gets got need needs want wants way
 
 export function buildAnswerer(chunks, { threshold = 0.4, oovMax = 0.25, maxSentences = 2 } = {}) {
   const toks = text => tokenize(text, { stemming: true });
-  const df = new Map();
-  for (const c of chunks) for (const t of new Set(toks(c.text))) df.set(t, (df.get(t) || 0) + 1);
+  const df = new Map(), proseDf = new Map();
+  // Text with code blocks and inline code removed: a word that only ever appears inside code (for example the
+  // package name in `@types/cors`) does not mean the docs explain that topic.
+  const prose = text => text.replace(/```[\s\S]*?```/g, ' ').replace(/`[^`\n]*`/g, ' ');
+  for (const c of chunks) {
+    for (const t of new Set(toks(c.text))) df.set(t, (df.get(t) || 0) + 1);
+    for (const t of new Set(toks(prose(c.text)))) proseDf.set(t, (proseDf.get(t) || 0) + 1);
+  }
+  // Barely known: appears in at most one passage and never in prose. Treated like a word the docs do not contain.
+  const known = t => df.has(t) && !(df.get(t) <= 1 && !proseDf.has(t));
   const idf = t => Math.log((chunks.length + 1) / ((df.get(t) || 0) + 1)) + 1;
   const mass = terms => terms.reduce((s, t) => s + idf(t), 0);
 
   return {
     setThreshold(t, o = oovMax) { threshold = t; oovMax = o; },
-    /** Share of the question's IDF mass made of words that never occur anywhere in the corpus. */
+    /** Share of the question's IDF mass made of words the corpus never explains (absent, or only once inside code). */
     oov(question) {
-      const q = [...new Set(toks(question))].filter(t => df.has(t) || !QUESTION_WORDS.has(t));
-      const total = q.reduce((s, t) => s + (df.has(t) ? idf(t) : 3), 0) || 1;
-      return q.filter(t => !df.has(t)).reduce((s) => s + 3, 0) / total;
+      const q = [...new Set(toks(question))].filter(t => known(t) || !QUESTION_WORDS.has(t));
+      const total = q.reduce((s, t) => s + (known(t) ? idf(t) : 3), 0) || 1;
+      return q.filter(t => !known(t)).reduce((s) => s + 3, 0) / total;
     },
     /** Scores every sentence in the retrieved chunks. Exposed so evaluation can sweep the threshold. */
     rank(question, results) {
