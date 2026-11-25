@@ -149,3 +149,12 @@ code{font:500 .9em 'JetBrains Mono',monospace}
 [data-theme="dark"]{--code-bg:#000;--code-ink:#e9e7f0;--code-mute:#8d8a99}
 .how .jump{display:none}
 @media (max-width:1000px){.how .jump{display:inline}}
+/* Motion: the answer is highlighted the way a person would mark it, then the evidence follows. */
+@media (prefers-reduced-motion:no-preference){
+.ans mark{background-size:0% 100%;background-repeat:no-repeat;animation:mark .7s .05s cubic-bezier(.6,.05,.2,1) forwards}
+@keyframes mark{to{background-size:100% 100%}}
+.ans.refused .big{animation:rise .4s ease-out both}.ans .how{animation:rise .4s .35s ease-out both}
+.ev li{animation:rise .35s ease-out both}.ev li:nth-child(2){animation-delay:.05s}.ev li:nth-child(3){animation-delay:.1s}.ev li:nth-child(4){animation-delay:.15s}.ev li:nth-child(5){animation-delay:.2s}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+.rb .ln{animation:fadein .25s ease-out both}@keyframes fadein{from{opacity:0}}
+}
