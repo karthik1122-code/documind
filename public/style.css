@@ -132,3 +132,20 @@ code{font:500 .9em 'JetBrains Mono',monospace}
  .desk-in{padding:28px 18px}.foot{padding:16px 18px}
  .bar{flex-wrap:wrap;height:auto;padding:10px 16px;gap:10px}.modeline{display:none}.seg{order:5;width:100%}.seg button{flex:1}
 }
+
+/* Reader: the page reads like a page. Prose in the reading face, headings by level, code as blocks. */
+.ln.prose .c{font:400 15px/1.7 'Bricolage Grotesque',sans-serif;color:var(--ink2);padding-top:1px;padding-bottom:1px}
+.ln.h .c{font:700 17px/1.4 'Bricolage Grotesque',sans-serif;letter-spacing:-.01em;color:var(--ink);padding-top:14px}
+.ln.h1 .c,.ln.h2 .c{font-size:22px;letter-spacing:-.02em;padding-top:20px}
+.ln.h .n{padding-top:14px}.ln.h1 .n,.ln.h2 .n{padding-top:20px}
+.ln.code .c{background:var(--code-bg);color:var(--code-ink);font-size:12.5px;padding-left:14px;margin-right:18px}
+.ln.code.start .c{border-radius:4px 4px 0 0;padding-top:6px}.ln.code.end .c{border-radius:0 0 4px 4px;padding-bottom:6px}
+.ln.fence .c{color:var(--code-mute);font-size:11px}
+.ln.meta .c{color:var(--mute);font-size:11.5px}
+.ln.inp .c{background:var(--fill-soft)}.ln.inp.code .c{background:var(--code-bg);box-shadow:inset 3px 0 0 var(--marker)}
+.ln.inp.prose .c,.ln.inp.h .c{color:var(--ink)}
+.rb mark{font:inherit}
+:root{--code-bg:#16161a;--code-ink:#e9e7f0;--code-mute:#8d8a99}
+[data-theme="dark"]{--code-bg:#000;--code-ink:#e9e7f0;--code-mute:#8d8a99}
+.how .jump{display:none}
+@media (max-width:1000px){.how .jump{display:inline}}
