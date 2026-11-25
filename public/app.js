@@ -59,13 +59,21 @@ function paint(doc, hit) {
   const text = doc.text; const lines = text.split('\n'); let off = 0;
   const P = hit && hit.passage, M = (hit && hit.marks) || [];
   const frag = document.createDocumentFragment(); let firstMark = null, firstPass = null;
+  // Read the page like a page: prose in the reading font, headings sized by level, code fences as code blocks.
+  // Only the look changes; every character stays in place, so the marked ranges still line up.
+  let inCode = false, inMeta = false;
   lines.forEach((ln, i) => {
     const s = off, e = off + ln.length; off = e + 1;
     const row = document.createElement('div'); row.className = 'ln';
+    const fence = /^\s*(```|~~~)/.test(ln);
+    if (i === 0 && ln.trim() === '---') inMeta = true;
+    if (inMeta) { row.classList.add('meta'); if (i > 0 && ln.trim() === '---') inMeta = false; }
+    else if (fence) { row.classList.add('code', 'fence', inCode ? 'end' : 'start'); inCode = !inCode; }
+    else if (inCode) row.classList.add('code');
+    else { const h = /^(#{1,4})\s/.exec(ln); if (h) row.classList.add('h', 'h' + h[1].length); else if (ln.trim()) row.classList.add('prose'); }
     const n = document.createElement('span'); n.className = 'n'; n.textContent = i + 1;
     const c = document.createElement('span'); c.className = 'c';
     const inP = P && s < P[1] && e >= P[0] && !(e === P[0]); if (inP) { row.classList.add('inp'); if (!firstPass) firstPass = row; }
-    if (/^#{1,3}\s/.test(ln) || /^title:/.test(ln)) row.classList.add('h');
     const cuts = new Set([s, e]); for (const [a, b] of M) { if (a < e && b > s) { cuts.add(Math.max(a, s)); cuts.add(Math.min(b, e)); } }
     const pts = [...cuts].sort((x, y) => x - y);
     for (let k = 0; k < pts.length - 1; k++) {
@@ -146,7 +154,9 @@ function renderAnswer(t) {
     const mode = document.createElement('span'); mode.textContent = ans.note || (ans.mode === 'extractive' ? 'Copied from the source, nothing generated' : 'Written from the passages only');
     const cp = document.createElement('button'); cp.type = 'button'; cp.textContent = 'Copy answer';
     cp.onclick = async () => { try { await navigator.clipboard.writeText(ans.text); cp.textContent = 'Copied'; } catch { cp.textContent = 'Copy blocked'; } setTimeout(() => { cp.textContent = 'Copy answer'; }, 1500); };
-    how.append(mode, cp); a.append(how);
+    const jump = document.createElement('button'); jump.type = 'button'; jump.className = 'jump'; jump.textContent = 'See it in the page';
+    jump.onclick = () => $('reader').scrollIntoView({ behavior: 'smooth' });
+    how.append(mode, cp, jump); a.append(how);
   }
 }
 const show = i => {
@@ -172,7 +182,7 @@ async function ask(question) {
     const post = extra => fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(collection ? { question, collection, ...extra } : { question }) });
     let res = await post();
     if (res.status === 404 && collection && collPayload.length) res = await post({ files: collPayload });
-    if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(res.status === 429 ? 'Too many questions. Wait a minute and try again.' : d.message || 'Something went wrong.'); }
+    if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(res.status === 429 ? 'You asked a lot in one minute. Give it a few seconds, then ask again.' : d.message || 'Something went wrong.'); }
     const reader = res.body.getReader(); const decoder = new TextDecoder(); let buf = '';
     while (true) {
       const { value, done } = await reader.read(); if (done) break;
